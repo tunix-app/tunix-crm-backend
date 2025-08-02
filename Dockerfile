@@ -1,27 +1,26 @@
-FROM node:20.18.0-slim AS builder
-
-LABEL fly_launch_runtime="NestJS"
-ENV NODE_ENV build
-
-WORKDIR /app
-COPY . /app
-
-ARG YARN_VERSION=1.22.21
-RUN yarn install \
-    && yarn build \
-    && yarn cache clean 
-
-
-FROM node:20.18.0-slim
-
-ENV NODE_ENV production
-
+# Stage 1: Development
+# ─── BUILD STAGE ─────────────────────────────────────────────────────────────
+FROM node:20-slim AS builder
 WORKDIR /app
 
-COPY --from=builder /app/package*.json /app
-COPY --from=builder /app/node_modules /app/node_modules
-COPY --from=builder /app/dist/ /app/dist
+# Install deps
+COPY package*.json ./
+RUN yarn install --frozen-lockfile
 
+# Compile source
+COPY . .
+RUN yarn build
 
-EXPOSE 8080
-CMD [ "node", "dist/main.js" ]
+# ─── RUN STAGE ───────────────────────────────────────────────────────────────
+FROM node:20-slim
+WORKDIR /app
+
+# Only prod deps
+COPY package*.json ./
+RUN yarn install --frozen-lockfile --production
+
+# Copy built artifacts
+COPY --from=builder /app/dist ./dist
+
+# Use the same port logic in main.ts
+CMD ["node", "dist/src/main.js"]

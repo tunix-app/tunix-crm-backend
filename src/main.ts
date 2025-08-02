@@ -7,9 +7,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors({ origin: true, credentials: true });
 
-  const port = 8080;
-  app.listen(port, '0.0.0.0', () => {
-    console.log(`Listening on 0.0.0.0:${port}`);
-  });
+   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+  app.listen(port);
 }
 bootstrap();
