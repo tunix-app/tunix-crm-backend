@@ -20,4 +20,4 @@ jobs:
         #   version: v0.0.400       # or “latest”
 
       - name: Deploy to Fly
-        run: flyctl deploy --config fly.toml --app hello-world-nest
+        run: flyctl deploy --config fly.toml --app tunix-crm-backend
