@@ -1,0 +1,6 @@
+@"
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+yarn lint && yarn test:cov && yarn build
+"@ | Out-File -Encoding ASCII .husky/pre-commit
