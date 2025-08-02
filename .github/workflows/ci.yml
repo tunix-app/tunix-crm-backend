@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main    # or whatever branch you protect
+
+jobs:
+  test:
+    name: 🧪 Test Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'       # adjust as needed
+      - run: yarn install --frozen-lockfile
+      - run: yarn test:cov
+
+  lint:
+    name: 🔍 Lint
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - run: yarn install --frozen-lockfile
+      - run: yarn lint
+
+  build:
+    name: 🏗️ Build
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - run: yarn install --frozen-lockfile
+      - run: yarn build
