@@ -7,7 +7,7 @@ async function bootstrap() {
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors({ origin: true, credentials: true });
 
-  const port = process.env.PORT ? Number(process.env.PORT) : 3000;
+  const port = 8080;
   await app.listen(port);
 
   console.log(`API listening on http://localhost:${port}`);
