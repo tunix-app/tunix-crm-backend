@@ -8,8 +8,8 @@ async function bootstrap() {
   app.enableCors({ origin: true, credentials: true });
 
   const port = 8080;
-  await app.listen(port);
-
-  console.log(`API listening on http://localhost:${port}`);
+  app.listen(port, '0.0.0.0', () => {
+    console.log(`Listening on 0.0.0.0:${port}`);
+  });
 }
 bootstrap();
