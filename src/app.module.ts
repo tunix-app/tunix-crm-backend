@@ -4,10 +4,6 @@ import { KnexModule } from './infra/database/knex.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [
-    ConfigModule,
-    KnexModule,
-    HealthModule,
-  ],
+  imports: [ConfigModule, KnexModule, HealthModule],
 })
 export class AppModule {}
