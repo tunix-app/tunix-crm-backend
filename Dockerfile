@@ -24,4 +24,4 @@ COPY --from=builder /app/dist/ /app/dist
 
 
 EXPOSE 8080
-CMD [ "yarn", "run", "start" ]
+CMD [ "node", "dist/main.js" ]
