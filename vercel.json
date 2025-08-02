@@ -7,6 +7,7 @@
     { "src": "/(.*)", "dest": "api/index.ts" }
   ],
   "github": {
-    "productionBranch": "main"
+    "productionBranch": "main",
+    "silent": true
   }
 }
