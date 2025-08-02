@@ -5,12 +5,19 @@ on:
       - main # change to main if needed
 jobs:
   deploy:
-    name: Deploy app
     runs-on: ubuntu-latest
-    concurrency: deploy-group    # optional: ensure only one action runs at a time
+    env:
+      # makes flyctl auth happen automatically
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+        # optionally pin to a version:
+        # with:
+        #   version: v0.0.400       # or “latest”
+
+      - name: Deploy to Fly
+        run: flyctl deploy --config fly.toml --app hello-world-nest
