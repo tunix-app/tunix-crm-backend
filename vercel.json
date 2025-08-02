@@ -1,10 +1,17 @@
 {
   "version": 2,
   "builds": [
-    { "src": "api/index.ts", "use": "@vercel/node" }
+    { 
+      "src": "api/main.ts",
+      "use": "@vercel/node" 
+    }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "api/index.ts" }
+    { 
+      "src": "/(.*)", 
+      "dest": "api/main.ts",
+      "methods": ["GET", "POST", "PUT", "PATCH", "DELETE"]
+    }
   ],
   "github": {
     "productionBranch": "main",
