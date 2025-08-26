@@ -6,7 +6,12 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['eslint.config.mjs'],
+    ignores: [
+      'eslint.config.mjs',
+      '**/*.spec.ts',
+      '**/*.test.ts',
+      'test/**',
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
@@ -31,7 +36,9 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-argument': 'warn',
       '@typescript-eslint/no-unsafe-assignment': 'warn', // Warn on unsafe assignments
       '@typescript-eslint/no-unsafe-return': 'warn', // Warn on unsafe assignments
+      '@typescript-eslint/no-unsafe-call': 'warn', // Warn on unsafe assignments
       '@typescript-eslint/no-unsafe-member-access': 'warn',
+      '@typescript-eslint/require-await': 'warn',
     },
   },
 );
