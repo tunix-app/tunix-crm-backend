@@ -20,12 +20,17 @@ exports.up = async function up(knex) {
   });
 
   // Create userRelation table
-  await knex.schema.createTable('userRelation', (t) => {
+  await knex.schema.createTable('clients', (t) => {
     t.uuid('id').primary().defaultTo(knex.raw('gen_random_uuid()'));
-    t.uuid('coach_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
-    t.uuid('client_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
-    t.unique(['coach_id', 'client_id']);
+    t.uuid('trainer_id').notNullable().references('id').inTable('users').onDelete('CASCADE');
+    t.specificType('email', 'citext').unique();
+    t.text('first_name');
+    t.text('last_name');
+    t.text('phone');
+    t.text('notes');
+    t.boolean('is_active').defaultTo(true);
     t.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
+    t.timestamp('updated_at', { useTz: true }).defaultTo(knex.fn.now());
   });
 };
 
@@ -33,7 +38,7 @@ exports.up = async function up(knex) {
  * @param { import('knex').Knex } knex
  */
 exports.down = async function down(knex) {
-  await knex.schema.dropTableIfExists('userRelation');
+  await knex.schema.dropTableIfExists('clients');
   await knex.schema.alterTable('users', (t) => {
     t.dropColumn('role');
   });
