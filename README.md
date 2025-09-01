@@ -16,7 +16,15 @@ This is the backend monorepo of the application and is connected through the fol
 - DB: Supabase
 - JS Framework: NestJS
 
-To run the application, you need an .env file at the root, please reach out to [@JCelestial](https://github.com/JCelestial) for more information.
+To run the application, you need an .env file at the root, and it needs the following fields:
+```
+DATABASE_URL=postgresql://postgres:<SECRET><PROJECT KEY>.supabase.co:5432/postgres
+DIRECT_URL=postgresql://postgres.<SECRET>@aws-0-us-east-2.pooler.supabase.com:6543/postgres
+JWT_SECRET=<SECRET>
+NODE_ENV=development
+SUPABASE_SERVICE_ROLE_KEY=<SECRET>
+SUPABASE_URL=https://<PROJECT KEY>.supabase.co
+```
 
 The monorepo manages libraries using [Yarn](https://yarnpkg.com/)
 
