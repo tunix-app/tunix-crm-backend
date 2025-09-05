@@ -1,4 +1,4 @@
-import { Controller } from "@nestjs/common";
+import { Controller, Delete, Get, Patch, Post } from "@nestjs/common";
 import { ClientService } from './services/client.service';
 
 
@@ -6,5 +6,20 @@ import { ClientService } from './services/client.service';
 export class ClientController {
     constructor(private readonly clientService: ClientService) {}
 
-    // GET, PUT, PATCH
+    @Post('/clients')
+    async creeateClient() {}
+
+    @Get('/client')
+    async getClient() {}
+
+    @Get('/client/:id')
+    async getClientById() {}
+
+    @Patch('/client/:id')
+    async updateClient() {}
+
+    @Delete('/client/:id')
+    async deleteClient() {}
+    // soft delete, mark is_active to false
+
 }
