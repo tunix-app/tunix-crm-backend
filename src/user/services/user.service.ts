@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { KnexService } from '../../infra/database/knex.service';
+import { CreateUserDto } from '../dto/user.dto';
 
 const ALLOWED_COLUMNS = ['email', 'role', 'first_name', 'last_name'];
 
@@ -9,6 +10,14 @@ export class UserService {
   private readonly logger = new Logger(UserService.name);
 
   constructor(private readonly knexService: KnexService) {}
+
+  async createUser(createUser: CreateUserDto) {
+    const newUser = await this.knexService.db('users').insert(createUser).returning('*');
+    if (!newUser || newUser.length === 0) {
+      throw new BadRequestException('Failed to create user');
+    }
+    return newUser[0];
+  }
 
   async getUserById(id: string) {
     const user = await this.knexService.db('users').where({ id }).first();

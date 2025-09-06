@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
+import { ClientModule } from './client/client.module';
 
 @Module({
   imports: [
@@ -13,7 +14,8 @@ import { UserModule } from './user/user.module';
     KnexModule, 
     HealthModule, 
     AuthModule, 
-    UserModule
+    UserModule,
+    ClientModule
   ],
   controllers: [AppController],
   providers: [AppService]
