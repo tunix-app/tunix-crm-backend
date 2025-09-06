@@ -14,4 +14,4 @@ import { ClientService } from './services/client.service';
         ClientService
     ]
 })
-export class UserModule {}
+export class ClientModule {}

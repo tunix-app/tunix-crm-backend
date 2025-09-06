@@ -1,25 +1,32 @@
-import { Controller, Delete, Get, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post } from "@nestjs/common";
 import { ClientService } from './services/client.service';
+import { createClient } from "@supabase/supabase-js";
+import { CreateClientDto } from "./dto/client.dto";
 
 
 @Controller('client')
 export class ClientController {
     constructor(private readonly clientService: ClientService) {}
 
-    @Post('/clients')
-    async creeateClient() {}
+    @Post()
+    async createClient(@Body() createClient: CreateClientDto) {
+        return this.clientService.createClient(createClient);
+    }
 
-    @Get('/client')
-    async getClient() {}
+    @Get(':id')
+    async getClientById(@Param('id') id: string) {
+        return this.clientService.getClientById(id);
+    }
 
-    @Get('/client/:id')
-    async getClientById() {}
+    @Patch(':id')
+    async updateClient(@Param('id') id: string, @Body() updateData: any) {
+        return this.clientService.updateClient(id, updateData);
+    }
 
-    @Patch('/client/:id')
-    async updateClient() {}
-
-    @Delete('/client/:id')
-    async deleteClient() {}
+    @Delete(':id')
+    async deleteClient(@Param('id') id: string) {
+        return this.clientService.decommissionClient(id);
+    }
     // soft delete, mark is_active to false
 
 }
