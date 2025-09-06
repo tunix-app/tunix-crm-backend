@@ -1,4 +1,10 @@
-import { IsEmail, IsOptional, IsString, IsNotEmpty, IsUUID, IsBoolean } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  IsNotEmpty,
+  IsUUID,
+  IsBoolean,
+} from 'class-validator';
 
 export class CreateClientDto {
   @IsUUID()
@@ -23,7 +29,6 @@ export class CreateClientDto {
 }
 
 export class UpdateClientDto {
-
   @IsString()
   @IsOptional()
   phone?: string;

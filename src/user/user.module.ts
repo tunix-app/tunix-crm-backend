@@ -4,14 +4,8 @@ import { UserController } from './user.controller';
 import { UserService } from './services/user.service';
 
 @Module({
-    imports: [
-        KnexModule
-    ],
-    controllers: [
-        UserController
-    ],
-    providers: [
-        UserService
-    ]
+  imports: [KnexModule],
+  controllers: [UserController],
+  providers: [UserService],
 })
 export class UserModule {}

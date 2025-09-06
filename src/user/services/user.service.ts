@@ -1,9 +1,13 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { KnexService } from '../../infra/database/knex.service';
 import { CreateUserDto } from '../dto/user.dto';
 
 const ALLOWED_COLUMNS = ['email', 'role', 'first_name', 'last_name'];
-
 
 @Injectable()
 export class UserService {
@@ -12,7 +16,10 @@ export class UserService {
   constructor(private readonly knexService: KnexService) {}
 
   async createUser(createUser: CreateUserDto) {
-    const newUser = await this.knexService.db('users').insert(createUser).returning('*');
+    const newUser = await this.knexService
+      .db('users')
+      .insert(createUser)
+      .returning('*');
     if (!newUser || newUser.length === 0) {
       throw new BadRequestException('Failed to create user');
     }
@@ -38,7 +45,9 @@ export class UserService {
     });
 
     if (Object.keys(filteredData).length === 0) {
-      this.logger.error(`provided request body does not contain columns from users table`);
+      this.logger.error(
+        `provided request body does not contain columns from users table`,
+      );
       throw new BadRequestException('No valid fields to update');
     }
 

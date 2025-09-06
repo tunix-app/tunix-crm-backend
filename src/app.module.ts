@@ -10,14 +10,14 @@ import { ClientModule } from './client/client.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }), 
-    KnexModule, 
-    HealthModule, 
-    AuthModule, 
+    ConfigModule.forRoot({ isGlobal: true }),
+    KnexModule,
+    HealthModule,
+    AuthModule,
     UserModule,
-    ClientModule
+    ClientModule,
   ],
   controllers: [AppController],
-  providers: [AppService]
+  providers: [AppService],
 })
 export class AppModule {}

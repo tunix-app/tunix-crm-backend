@@ -4,14 +4,8 @@ import { ClientController } from './client.controller';
 import { ClientService } from './services/client.service';
 
 @Module({
-    imports: [
-        KnexModule
-    ],
-    controllers: [
-        ClientController
-    ],
-    providers: [
-        ClientService
-    ]
+  imports: [KnexModule],
+  controllers: [ClientController],
+  providers: [ClientService],
 })
 export class ClientModule {}
