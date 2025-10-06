@@ -6,8 +6,16 @@ import {
 } from '@nestjs/common';
 import { KnexService } from '../../infra/database/knex.service';
 import { CreateUserDto } from '../dto/user.dto';
+import { User } from 'src/types/db/user';
 
-const ALLOWED_COLUMNS = ['email', 'role', 'first_name', 'last_name'];
+const ALLOWED_COLUMNS = [
+  'email',
+  'role',
+  'first_name',
+  'last_name',
+  'phone',
+  'bio',
+];
 
 @Injectable()
 export class UserService {
@@ -15,8 +23,8 @@ export class UserService {
 
   constructor(private readonly knexService: KnexService) {}
 
-  async createUser(createUser: CreateUserDto) {
-    const newUser = await this.knexService
+  async createUser(createUser: CreateUserDto): Promise<User> {
+    const newUser: User[] = await this.knexService
       .db('users')
       .insert(createUser)
       .returning('*');
@@ -26,7 +34,7 @@ export class UserService {
     return newUser[0];
   }
 
-  async getUserById(id: string) {
+  async getUserById(id: string): Promise<User> {
     const user = await this.knexService.db('users').where({ id }).first();
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -34,7 +42,7 @@ export class UserService {
     return user;
   }
 
-  async updateUser(id: string, updateData: any) {
+  async updateUser(id: string, updateData: any): Promise<User> {
     this.logger.log(`Inside update user logic`);
     // Filter out keys not in allowed columns
     const filteredData: Record<string, any> = {};

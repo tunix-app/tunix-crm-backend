@@ -29,6 +29,10 @@ export class CreateClientDto {
 }
 
 export class UpdateClientDto {
+  @IsUUID()
+  @IsNotEmpty()
+  trainer_id: string;
+
   @IsString()
   @IsOptional()
   phone?: string;

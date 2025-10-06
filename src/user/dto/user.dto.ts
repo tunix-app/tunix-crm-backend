@@ -46,4 +46,8 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   last_name?: string;
+
+  @IsString()
+  @IsOptional()
+  phone?: string;
 }

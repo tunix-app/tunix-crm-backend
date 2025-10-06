@@ -8,7 +8,7 @@ import {
   Post,
 } from '@nestjs/common';
 import { ClientService } from './services/client.service';
-import { CreateClientDto } from './dto/client.dto';
+import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
 
 @Controller('client')
 export class ClientController {
@@ -20,18 +20,27 @@ export class ClientController {
   }
 
   @Get(':id')
-  async getClientById(@Param('id') id: string) {
-    return this.clientService.getClientById(id);
+  async getClientById(@Param('clientId') clientId: string) {
+    return this.clientService.getClientById(clientId);
+  }
+
+  // Get all clients for a specific user id
+  @Get('/trainer/:trainerId')
+  async getAllActiveClients(@Param('trainerId') trainerId: string) {
+    return this.clientService.getClientsByTrainerId(trainerId);
   }
 
   @Patch(':id')
-  async updateClient(@Param('id') id: string, @Body() updateData: any) {
-    return this.clientService.updateClient(id, updateData);
+  async updateClient(
+    @Param('clientId') clientId: string,
+    @Body() updateData: UpdateClientDto,
+  ) {
+    return this.clientService.updateClient(clientId, updateData);
   }
 
   @Delete(':id')
-  async deleteClient(@Param('id') id: string) {
-    return this.clientService.decommissionClient(id);
+  async decommissionClient(@Param('clientId') clientId: string) {
+    return this.clientService.decommissionClient(clientId);
   }
   // soft delete, mark is_active to false
 }
