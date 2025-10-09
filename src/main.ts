@@ -1,13 +1,21 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './filters/http-exception.filter';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 // TODO: Replace default logger with winston
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['log', 'error', 'warn', 'debug', 'verbose'],
   });
+
+
+  app.useGlobalPipes(new ValidationPipe({
+    // whitelist: true,
+    // forbidNonWhitelisted: true,
+    transform: true,
+  }))
+
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors({ origin: true, credentials: true });
 

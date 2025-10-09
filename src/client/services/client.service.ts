@@ -5,10 +5,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { KnexService } from 'src/infra/database/knex.service';
-import { CreateClientDto } from '../dto/client.dto';
-import { Client } from 'src/types/db/client';
-
-const ALLOWED_COLUMNS = ['email', 'phone', 'first_name', 'last_name', 'notes'];
+import { Client, CreateClientDto, UpdateClientDto } from 'src/types/dto/client.dto';
+import { ClientEntity } from 'src/types/db/client';
 
 @Injectable()
 export class ClientService {
@@ -16,86 +14,262 @@ export class ClientService {
 
   constructor(private readonly knexService: KnexService) {}
 
-  async createClient(createClient: CreateClientDto): Promise<Client> {
-    const trainer = await this.knexService
-      .db('users')
-      .where({ id: createClient.trainer_id })
-      .first(); // trainer must exist first before mappping to them
-    const clientMetadata = await this.knexService
-      .db('users')
-      .where({ id: createClient.client_id })
-      .first(); // client must not exist
+  async getClientsByTrainerId(trainerId: string): Promise<Client[]> {
+    
+    try {
+      const clients: ClientEntity[] = await this.knexService
+        .db('clients as C')
+        .join('users as U', 'C.client_id', 'U.id')
+        .select(
+          'C.id',
+          'C.client_id',
+          'U.first_name',
+          'U.last_name',
+          'U.email',
+          'C.is_active',
+          'C.last_session',
+          'C.next_session',
+          'C.current_program',
+        )
+        .where({ 'C.trainer_id': trainerId });
 
-    if (!trainer) {
-      throw new BadRequestException(
-        `Trainer with id ${createClient.trainer_id} does not exist`,
-      );
-    } else if (clientMetadata) {
-      throw new BadRequestException(
-        `Client with id ${createClient.client_id} does not exist`,
-      );
-    } else {
+      const result: Client[] = clients.map(c => {
+        return {
+          id: c.id,
+          client_id: c.client_id,
+          client_name: `${c.first_name} ${c.last_name}`,
+          client_email: c.email,
+          isActive: c.is_active,
+          last_session: c.last_session,
+          next_session: c.next_session,
+          current_program: c.current_program
+        } as Client
+      });
+
+      return result;
+    } catch (error) {
+      this.logger.error('Error fetching clients by trainer ID', error);
+      return [];
+    }
+  }
+
+  async searchClients(query: string): Promise<Client[]> {
+    // SELECT * FROM clients WHERE email ILIKE '%query%' OR phone ILIKE '%query%' OR first_name ILIKE '%query%' OR last_name ILIKE '%query%'
+
+    try {
+      const clients: ClientEntity[] = await this.knexService
+        .db('clients as C')
+        .join('users as U', 'C.client_id', 'U.id')
+        .select(
+          'C.id',
+          'C.client_id',
+          'U.first_name',
+          'U.last_name',
+          'U.email',
+          'C.phone',
+          'C.is_active',
+          'C.last_session',
+          'C.next_session',
+          'C.current_program'
+        )
+        .where(function() {
+          this.whereILike('U.email', `%${query}%`)
+            .orWhereILike('U.first_name', `%${query}%`)
+            .orWhereILike('U.last_name', `%${query}%`);
+        });
+
+      const result: Client[] = clients.map(c => {
+        return {
+          id: c.id,
+          client_id: c.client_id,
+          client_name: `${c.first_name} ${c.last_name}`,
+          client_email: c.email,
+          isActive: c.is_active,
+          last_session: c.last_session,
+          next_session: c.next_session,
+          current_program: c.current_program
+        } as Client
+      });
+
+      return result;
+    } catch (error) {
+      this.logger.error('Error searching clients', error);
+      return [];
+    }
+  }
+
+  async createClient(trainerId: string, createClient: CreateClientDto): Promise<any> {
+    /*
+      Scenarios:
+      non existing user, no existing mapping ==> create user and client mapping (new UUIDs)
+      existing user, no existing mapping ==> create client mapping (new UUID for client table)
+      existing user, existing mapping ==> throw error for now, look into future
+        rework of remapping to a different trainer if the client is no longer active ==> TODO
+      non existing user, existing mapping ==> not possible
+    
+    */
+    try {
+      const [firstName, lastName] = createClient.client_name.split(' ');
+
+      const existingUser = await this.knexService
+        .db('users')
+        .where('first_name', firstName)
+        .andWhere('last_name', lastName)
+        .andWhere('email', createClient.client_email)
+        .first();
+
+      const existingMapping = await this.knexService
+        .db('clients')
+        .where('client_id', existingUser.id)
+        .first();
+
+      if (existingUser && existingMapping) {
+        this.logger.warn(`Client already mapped to trainer - ${existingMapping.trainer_id}`);
+
+        throw new BadRequestException('Client already mapped to a trainer');
+      }
+      
+      if (!existingUser) {
+        const newUserPhone = createClient?.client_phone || undefined;
+        const newUser = {
+          email: createClient.client_email,
+          role: 'Client',
+          first_name: firstName,
+          last_name: lastName,
+          phone: newUserPhone,
+        }
+
+        await this.knexService
+          .db('users')
+          .insert(newUser)
+          .returning('*');
+
+      } 
+
       const newClient = await this.knexService
         .db('clients')
-        .insert(createClient)
+        .insert({
+          trainer_id: trainerId,
+          client_id: existingUser.id,
+          is_active: true,
+          goals: createClient?.goals ?? undefined,
+        })
         .returning('*');
-      if (!newClient) {
-        throw new BadRequestException('Failed to create client');
-      }
-      return newClient[0];
+
+        return { message: 'Client created successfully', client: newClient  };
+    } catch (error) {
+      this.logger.error('Error creating client', error);
+      return null;
     }
   }
 
   async getClientById(id: string): Promise<Client> {
-    const client: Client = await this.knexService
-      .db('clients')
-      .where({ id })
-      .first();
-    if (!client) {
-      throw new NotFoundException(`Client with id ${id} not found`);
-    }
-    return client;
-  }
+    this.logger.debug(`Fetching client with ID: ${id}`);
+    try {
+      const client: ClientEntity = await this.knexService
+        .db('clients as C')
+        .join('users as U', 'C.client_id', 'U.id')
+        .select(
+          'C.id',
+          'C.client_id',
+          'U.first_name',
+          'U.last_name',
+          'U.email',
+          'C.phone',
+          'C.is_active',
+          'C.last_session',
+          'C.next_session',
+          'C.current_program'
+        )
+        .where('C.id', id)
+        .first();
 
-  async getClientsByTrainerId(trainerId: string): Promise<Client[]> {
-    const clients: Client[] = await this.knexService
-      .db('clients')
-      .where({ trainer_id: trainerId });
-    return clients;
-  }
-
-  async updateClient(id: string, updateData: any): Promise<Client> {
-    this.logger.log(`Inside update client logic`);
-    // Filter out keys not in allowed columns
-    const filteredData: Record<string, any> = {};
-    Object.keys(updateData).forEach((key) => {
-      if (ALLOWED_COLUMNS.includes(key)) {
-        filteredData[key] = updateData[key];
+      if (!client) {
+        throw new NotFoundException('Client not found');
       }
-    });
 
-    if (Object.keys(filteredData).length === 0) {
-      this.logger.error(
-        `provided request body does not contain columns from users table`,
-      );
-      throw new BadRequestException('No valid fields to update');
+      return {
+        id: client.id,
+        client_id: client.client_id,
+        client_name: `${client.first_name} ${client.last_name}`,
+        client_email: client.email ?? "",
+        isActive: client.is_active,
+        last_session: client.last_session ?? new Date(""),
+        next_session: client.next_session ?? new Date(""),
+        current_program: client.current_program
+      };
+
+    } catch (error) {
+      this.logger.error('Error fetching client by ID', error);
+      throw new NotFoundException(error.message || 'Client not found');
     }
-
-    // Optionally update the updated_at timestamp
-    filteredData.updated_at = new Date();
-
-    await this.knexService.db('clients').where({ id }).update(filteredData);
-    return this.getClientById(id);
   }
 
-  async decommissionClient(id: string): Promise<void> {
-    this.logger.log(`Inside decommission client logic`);
-    const updateData = {
-      is_active: false,
-      updated_at: new Date(),
-    };
+  async updateClient(id: string, updateClient: UpdateClientDto): Promise<Client> {
 
-    await this.knexService.db('clients').where({ id }).update(updateData);
-    return;
+    try {
+      
+      const updateData = {
+        current_program: updateClient.current_program,
+        goals: updateClient.goals
+      }
+
+      const result = await this.knexService
+        .db('clients')
+        .where('id', id)
+        .update(updateData)
+        .returning('*');
+      
+      if (result.length === 0) {
+        throw new NotFoundException('Client not found');
+      }
+
+      const client: ClientEntity = await this.knexService
+        .db('clients as C')
+        .join('users as U', 'C.client_id', 'U.id')
+        .select(
+          'C.id',
+          'C.client_id',
+          'U.first_name',
+          'U.last_name',
+          'U.email',
+          'C.phone',
+          'C.is_active',
+          'C.last_session',
+          'C.next_session',
+          'C.current_program'
+        )
+        .where('C.id', id)
+        .first();
+
+      return {
+        id: client.id,
+        client_id: client.client_id,
+        client_name: `${client.first_name} ${client.last_name}`,
+        client_email: client.email ?? "",
+        isActive: client.is_active,
+        last_session: client.last_session ?? new Date(""),
+        next_session: client.next_session ?? new Date(""),
+        current_program: client.current_program
+      };
+
+    } catch (error) {
+      this.logger.error('Error updating client', error);
+      throw new BadRequestException('Failed to update client');
+    }
+  }
+
+  async decommissionClient(id: string): Promise<any> {
+    try {
+      await this.knexService
+        .db('clients')
+        .where('id', id)
+        .update({ is_active: false });
+
+      return { message: 'Client decommissioned successfully' };
+    } catch (error) {
+      this.logger.error('Error decommissioning client', error);
+      throw new BadRequestException('Failed to decommission client');
+    }
   }
 }

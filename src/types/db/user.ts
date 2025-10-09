@@ -1,11 +1,15 @@
 export type User = {
   id: string;
   email: string;
-  role: string;
+  role: UserRole;
   phone: string;
   bio: string;
   first_name: string;
   last_name: string;
-  created_at: Date;
-  updated_at: Date;
 };
+
+export enum UserRole {
+  ADMIN = 'Admin',
+  COACH = 'Coach',
+  CLIENT = 'Client'
+}
