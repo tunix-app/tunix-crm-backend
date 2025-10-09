@@ -6,45 +6,55 @@ import {
   Param,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { ClientService } from './services/client.service';
-import { CreateClientDto, SearchClientDto, UpdateClientDto } from 'src/types/dto/client.dto';
+import {
+  CreateClientDto,
+  SearchClientDto,
+  UpdateClientDto,
+} from 'src/types/dto/client.dto';
 
 @Controller('client')
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
-  @Get('trainer/:trainerId')
-  async getClientsByTrainerId(@Param('trainerId') trainerId: string) {
-    // Return Client[]
+  @Get('trainer')
+  async getClientsByTrainerId(@Query('trainerId') trainerId: string) {
+    return await this.clientService.getClientsByTrainerId(trainerId);
   }
 
   @Post('search-clients')
   async searchClients(@Body() body: SearchClientDto) {
-    // Return Client[]
+    return await this.clientService.searchClients(body.query);
   }
 
   @Get(':id')
   async getClientById(@Param('id') clientId: string) {
-    // return Client
+    return await this.clientService.getClientById(clientId);
   }
 
-  @Post()
-  async registerNewclient(@Body() createClientDto: CreateClientDto) {
-    // return Client
+  @Post('/trainer/:trainerId')
+  async registerNewclient(
+    @Param() params: any,
+    @Body() createClientDto: CreateClientDto,
+  ) {
+    return await this.clientService.createClient(
+      params.trainerId,
+      createClientDto,
+    );
   }
 
   @Patch(':id')
   async updateClient(
-    @Param('id') clientId: string,
+    @Param() params: any,
     @Body() updateData: UpdateClientDto,
   ) {
-    // return Client
+    return await this.clientService.updateClient(params.id, updateData);
   }
 
   @Delete(':id')
-  async decommisionClient(@Param('id') clientId: string) {
-    // return { message: 'Client deleted successfully' }
+  async decommisionClient(@Param() params: any) {
+    return await this.clientService.decommissionClient(params.id);
   }
-
 }

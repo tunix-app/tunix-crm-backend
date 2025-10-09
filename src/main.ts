@@ -9,12 +9,13 @@ async function bootstrap() {
     logger: ['log', 'error', 'warn', 'debug', 'verbose'],
   });
 
-
-  app.useGlobalPipes(new ValidationPipe({
-    // whitelist: true,
-    // forbidNonWhitelisted: true,
-    transform: true,
-  }))
+  app.useGlobalPipes(
+    new ValidationPipe({
+      // whitelist: true,
+      // forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
 
   app.useGlobalFilters(new AllExceptionsFilter());
   app.enableCors({ origin: true, credentials: true });

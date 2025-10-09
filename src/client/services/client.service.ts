@@ -5,7 +5,11 @@ import {
   Logger,
 } from '@nestjs/common';
 import { KnexService } from 'src/infra/database/knex.service';
-import { Client, CreateClientDto, UpdateClientDto } from 'src/types/dto/client.dto';
+import {
+  Client,
+  CreateClientDto,
+  UpdateClientDto,
+} from 'src/types/dto/client.dto';
 import { ClientEntity } from 'src/types/db/client';
 
 @Injectable()
@@ -15,7 +19,6 @@ export class ClientService {
   constructor(private readonly knexService: KnexService) {}
 
   async getClientsByTrainerId(trainerId: string): Promise<Client[]> {
-    
     try {
       const clients: ClientEntity[] = await this.knexService
         .db('clients as C')
@@ -33,7 +36,7 @@ export class ClientService {
         )
         .where({ 'C.trainer_id': trainerId });
 
-      const result: Client[] = clients.map(c => {
+      const result: Client[] = clients.map((c) => {
         return {
           id: c.id,
           client_id: c.client_id,
@@ -42,8 +45,8 @@ export class ClientService {
           isActive: c.is_active,
           last_session: c.last_session,
           next_session: c.next_session,
-          current_program: c.current_program
-        } as Client
+          current_program: c.current_program,
+        } as Client;
       });
 
       return result;
@@ -70,15 +73,15 @@ export class ClientService {
           'C.is_active',
           'C.last_session',
           'C.next_session',
-          'C.current_program'
+          'C.current_program',
         )
-        .where(function() {
+        .where(function () {
           this.whereILike('U.email', `%${query}%`)
             .orWhereILike('U.first_name', `%${query}%`)
             .orWhereILike('U.last_name', `%${query}%`);
         });
 
-      const result: Client[] = clients.map(c => {
+      const result: Client[] = clients.map((c) => {
         return {
           id: c.id,
           client_id: c.client_id,
@@ -87,8 +90,8 @@ export class ClientService {
           isActive: c.is_active,
           last_session: c.last_session,
           next_session: c.next_session,
-          current_program: c.current_program
-        } as Client
+          current_program: c.current_program,
+        } as Client;
       });
 
       return result;
@@ -98,7 +101,10 @@ export class ClientService {
     }
   }
 
-  async createClient(trainerId: string, createClient: CreateClientDto): Promise<any> {
+  async createClient(
+    trainerId: string,
+    createClient: CreateClientDto,
+  ): Promise<any> {
     /*
       Scenarios:
       non existing user, no existing mapping ==> create user and client mapping (new UUIDs)
@@ -124,11 +130,13 @@ export class ClientService {
         .first();
 
       if (existingUser && existingMapping) {
-        this.logger.warn(`Client already mapped to trainer - ${existingMapping.trainer_id}`);
+        this.logger.warn(
+          `Client already mapped to trainer - ${existingMapping.trainer_id}`,
+        );
 
         throw new BadRequestException('Client already mapped to a trainer');
       }
-      
+
       if (!existingUser) {
         const newUserPhone = createClient?.client_phone || undefined;
         const newUser = {
@@ -137,14 +145,10 @@ export class ClientService {
           first_name: firstName,
           last_name: lastName,
           phone: newUserPhone,
-        }
+        };
 
-        await this.knexService
-          .db('users')
-          .insert(newUser)
-          .returning('*');
-
-      } 
+        await this.knexService.db('users').insert(newUser).returning('*');
+      }
 
       const newClient = await this.knexService
         .db('clients')
@@ -156,7 +160,7 @@ export class ClientService {
         })
         .returning('*');
 
-        return { message: 'Client created successfully', client: newClient  };
+      return { message: 'Client created successfully', client: newClient };
     } catch (error) {
       this.logger.error('Error creating client', error);
       return null;
@@ -179,7 +183,7 @@ export class ClientService {
           'C.is_active',
           'C.last_session',
           'C.next_session',
-          'C.current_program'
+          'C.current_program',
         )
         .where('C.id', id)
         .first();
@@ -192,34 +196,34 @@ export class ClientService {
         id: client.id,
         client_id: client.client_id,
         client_name: `${client.first_name} ${client.last_name}`,
-        client_email: client.email ?? "",
+        client_email: client.email ?? '',
         isActive: client.is_active,
-        last_session: client.last_session ?? new Date(""),
-        next_session: client.next_session ?? new Date(""),
-        current_program: client.current_program
+        last_session: client.last_session ?? new Date(''),
+        next_session: client.next_session ?? new Date(''),
+        current_program: client.current_program,
       };
-
     } catch (error) {
       this.logger.error('Error fetching client by ID', error);
       throw new NotFoundException(error.message || 'Client not found');
     }
   }
 
-  async updateClient(id: string, updateClient: UpdateClientDto): Promise<Client> {
-
+  async updateClient(
+    id: string,
+    updateClient: UpdateClientDto,
+  ): Promise<Client> {
     try {
-      
       const updateData = {
         current_program: updateClient.current_program,
-        goals: updateClient.goals
-      }
+        goals: updateClient.goals,
+      };
 
       const result = await this.knexService
         .db('clients')
         .where('id', id)
         .update(updateData)
         .returning('*');
-      
+
       if (result.length === 0) {
         throw new NotFoundException('Client not found');
       }
@@ -237,7 +241,7 @@ export class ClientService {
           'C.is_active',
           'C.last_session',
           'C.next_session',
-          'C.current_program'
+          'C.current_program',
         )
         .where('C.id', id)
         .first();
@@ -246,13 +250,12 @@ export class ClientService {
         id: client.id,
         client_id: client.client_id,
         client_name: `${client.first_name} ${client.last_name}`,
-        client_email: client.email ?? "",
+        client_email: client.email ?? '',
         isActive: client.is_active,
-        last_session: client.last_session ?? new Date(""),
-        next_session: client.next_session ?? new Date(""),
-        current_program: client.current_program
+        last_session: client.last_session ?? new Date(''),
+        next_session: client.next_session ?? new Date(''),
+        current_program: client.current_program,
       };
-
     } catch (error) {
       this.logger.error('Error updating client', error);
       throw new BadRequestException('Failed to update client');

@@ -11,5 +11,5 @@ export type User = {
 export enum UserRole {
   ADMIN = 'Admin',
   COACH = 'Coach',
-  CLIENT = 'Client'
+  CLIENT = 'Client',
 }

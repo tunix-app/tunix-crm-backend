@@ -1,6 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { KnexService } from '../../infra/database/knex.service';
-import { CreateSessionDto, Session, UpdateSessionDto } from 'src/types/dto/session.dto';
+import {
+  CreateSessionDto,
+  Session,
+  UpdateSessionDto,
+} from 'src/types/dto/session.dto';
 import { SessionEntity } from 'src/types/db/session';
 
 @Injectable()
@@ -9,8 +13,14 @@ export class SessionService {
 
   constructor(private readonly knexService: KnexService) {}
 
-  async getSessionsByTimeRange(trainerId: string, startRange: string, endRange: string): Promise<Session[]> {
-    this.logger.debug(`Retrieving Sessions within ${startRange} to ${endRange}`);
+  async getSessionsByTimeRange(
+    trainerId: string,
+    startRange: string,
+    endRange: string,
+  ): Promise<Session[]> {
+    this.logger.debug(
+      `Retrieving Sessions within ${startRange} to ${endRange}`,
+    );
 
     try {
       const sessionEntities: SessionEntity[] = await this.knexService
@@ -26,13 +36,13 @@ export class SessionService {
           'S.session_type',
           'S.start_time',
           'S.end_time',
-          'S.description'
+          'S.description',
         )
         .where('S.trainer_id', trainerId)
         .where('S.start_time', '>=', startRange)
         .where('S.end_time', '<=', endRange);
-      
-      const result: Session[] = sessionEntities.map(s => {
+
+      const result: Session[] = sessionEntities.map((s) => {
         return {
           id: s.id,
           client_id: s.client_id,
@@ -41,10 +51,10 @@ export class SessionService {
           session_type: s.session_type,
           start_date: s.start_time,
           end_date: s.end_time,
-          description: s.description
-          }
+          description: s.description,
+        };
       });
-      
+
       return result;
     } catch (error) {
       this.logger.error('Error fetching sessions by time range', error);
@@ -67,21 +77,21 @@ export class SessionService {
           'S.session_type',
           'S.start_time',
           'S.end_time',
-          'S.description'
+          'S.description',
         )
         .where('S.id', sessionId)
         .first();
-      
+
       const result: Session = {
         id: session.id,
         client_id: session.client_id,
-        client_name: `${session.first_name} ${session.last_name}`,         
-        client_email: session.email, 
+        client_name: `${session.first_name} ${session.last_name}`,
+        client_email: session.email,
         session_type: session.session_type,
         start_date: session.start_time,
         end_date: session.end_time,
-        description: session.description
-      }
+        description: session.description,
+      };
 
       return result;
     } catch (error) {
@@ -92,24 +102,27 @@ export class SessionService {
 
   async createNewSession(createSession: CreateSessionDto): Promise<Session> {
     try {
-
       const existingClient = await this.knexService
         .db('clients')
         .where('client_id', createSession.client_id)
         .first();
-      
+
       if (!existingClient) {
-        this.logger.warn(`Client with ID ${createSession.client_id} does not exist`);
+        this.logger.warn(
+          `Client with ID ${createSession.client_id} does not exist`,
+        );
         throw new Error('Client does not exist');
       }
 
       const conflictingSessions = await this.knexService
         .db('sessions')
         .where('start_time', '<', createSession.end_time)
-        .where('end_time', '>', createSession.start_time)
-      
+        .where('end_time', '>', createSession.start_time);
+
       if (conflictingSessions.length > 0) {
-        this.logger.warn(`Session conflict detected for client ID ${createSession.client_id}`);
+        this.logger.warn(
+          `Session conflict detected for client ID ${createSession.client_id}`,
+        );
         throw new Error('Session time conflict');
       }
 
@@ -138,9 +151,11 @@ export class SessionService {
     }
   }
 
-  async updateSession(sessionId: string, updateData: UpdateSessionDto): Promise<Session> {
+  async updateSession(
+    sessionId: string,
+    updateData: UpdateSessionDto,
+  ): Promise<Session> {
     try {
-
       const startTime = updateData.start_time ?? undefined;
       const endTime = updateData.end_time ?? undefined;
 
@@ -157,7 +172,6 @@ export class SessionService {
         .update(dbSession)
         .returning('*');
 
-
       return updatedSession[0];
     } catch (error) {
       this.logger.error('Error updating session', error);
@@ -167,15 +181,11 @@ export class SessionService {
 
   async cancelSession(sessionId: string): Promise<{ message: string }> {
     try {
-      await this.knexService
-        .db('sessions')
-        .where('id', sessionId)
-        .del();
+      await this.knexService.db('sessions').where('id', sessionId).del();
       return { message: 'Session deleted successfully' };
     } catch (error) {
       this.logger.error('Error deleting session', error);
       throw error;
     }
   }
-
 }

@@ -14,5 +14,5 @@ export enum SessionType {
   STRETCH = 'Stretch',
   TRAINING = 'Personal Training',
   GROUP_TRAINING = 'Group Training',
-  NEURO_RECON = 'Neuromuscular Reconstruction'
+  NEURO_RECON = 'Neuromuscular Reconstruction',
 }

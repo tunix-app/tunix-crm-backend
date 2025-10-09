@@ -1,4 +1,4 @@
-import { IsDate, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 import { SessionType } from '../db/session';
 
 export class Session {
@@ -8,7 +8,7 @@ export class Session {
   client_email: string;
   session_type: SessionType;
   start_date: Date;
-  end_date: Date
+  end_date: Date;
   description: string;
 }
 
@@ -33,7 +33,7 @@ export class CreateSessionDto {
   @IsString()
   @IsNotEmpty()
   client_email: string;
-  
+
   @IsString()
   @IsNotEmpty()
   session_type: SessionType;

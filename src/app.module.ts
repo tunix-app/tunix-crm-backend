@@ -19,7 +19,7 @@ import { NoteModule } from './note/note.module';
     UserModule,
     ClientModule,
     SessionModule,
-    NoteModule
+    NoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],
