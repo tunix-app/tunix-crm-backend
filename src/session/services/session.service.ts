@@ -119,6 +119,7 @@ export class SessionService {
 
   async createNewSession(createSession: CreateSessionDto): Promise<Session> {
     try {
+      this.logger.debug(`Creating new session for client ID ${createSession.client_id}`);
       const existingClient = await this.knexService
         .db('clients')
         .where('client_id', createSession.client_id)
@@ -170,6 +171,7 @@ export class SessionService {
     updateData: UpdateSessionDto,
   ): Promise<Session> {
     try {
+      this.logger.debug(`Updating session with ID: ${sessionId}`);
       const existingSession = await this.knexService
         .db('sessions')
         .where('id', sessionId)
@@ -202,6 +204,7 @@ export class SessionService {
 
   async cancelSession(sessionId: string): Promise<{ message: string }> {
     try {
+      this.logger.debug(`Deleting session with ID: ${sessionId}`);
       await this.knexService.db('sessions').where('id', sessionId).del();
       return { message: 'Session deleted successfully' };
     } catch (error) {

@@ -225,6 +225,7 @@ export class ClientService {
     updateClient: UpdateClientDto,
   ): Promise<Client> {
     try {
+      this.logger.debug(`Updating client with ID: ${id}`);
       const updateData = {
         current_program: updateClient.current_program,
         goals: updateClient.goals,
@@ -278,6 +279,7 @@ export class ClientService {
 
   async decommissionClient(id: string): Promise<any> {
     try {
+      this.logger.debug(`Decommissioning client with ID: ${id}`);
       await this.knexService
         .db('clients')
         .where('id', id)

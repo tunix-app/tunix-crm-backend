@@ -10,6 +10,7 @@ export class NoteService {
   constructor(private readonly knexService: KnexService) {}
 
   async getNotesByClientId(clientId: string) {
+    this.logger.debug(`Fetching notes for client ${clientId}`);
     try {
       const notes: NoteEntity[] = await this.knexService
         .db('notes as N')
@@ -37,6 +38,7 @@ export class NoteService {
   }
 
   async createNote(clientId: string, newNote: any) {
+    this.logger.debug(`Creating note for client ${clientId}`);
     try {
       const existingClient = await this.knexService
         .db('clients')
@@ -67,6 +69,7 @@ export class NoteService {
   }
 
   async updateNote(id: string, updateNote: any) {
+    this.logger.debug(`Updating note ${id}`);
     try {
       await this.knexService
         .db('notes')
@@ -85,6 +88,7 @@ export class NoteService {
   }
 
   async deleteNote(id: string) {
+    this.logger.debug(`Deleting note ${id}`);
     try {
       await this.knexService.db('notes').where('id', id).del();
       return { message: 'Note deleted successfully' };
