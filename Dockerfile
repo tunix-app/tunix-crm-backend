@@ -1,6 +1,6 @@
 # Stage 1: Development
 # ─── BUILD STAGE ─────────────────────────────────────────────────────────────
-FROM node:20-slim AS builder
+FROM node:22-slim AS builder
 WORKDIR /app
 
 # Install deps
@@ -12,7 +12,7 @@ COPY . .
 RUN yarn build
 
 # ─── RUN STAGE ───────────────────────────────────────────────────────────────
-FROM node:20-slim
+FROM node:22-slim
 WORKDIR /app
 
 # Only prod deps
