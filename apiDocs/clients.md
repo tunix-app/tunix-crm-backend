@@ -161,3 +161,10 @@ Response:
 
 ### Decommission Client
 `DELETE ./client/{clientId}`
+
+Response:
+```json
+{
+    "message": "Client has been decommissioned"
+}
+```

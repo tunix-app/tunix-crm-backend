@@ -69,3 +69,10 @@ Response:
 
 ### Delete Client Note
 `DELETE ./note/{noteId}`
+
+Response:
+```json
+{
+    "message": "note has been deleted"
+}
+```

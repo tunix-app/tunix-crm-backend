@@ -101,3 +101,10 @@ Response:
 
 ### Delete Existing Session:
 `DELETE ./session/{sessionId}`
+
+Response:
+```json
+{
+    "message": "session has been cancelled"
+}
+```
