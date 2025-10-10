@@ -37,3 +37,9 @@ To run
 yarn start // to start the application detached
 yarn dev // to start the application while watching
 ```
+
+Fly commands for diagnosing Deployment issues
+
+```
+fly apps list
+```
