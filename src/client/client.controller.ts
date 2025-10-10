@@ -19,9 +19,9 @@ import {
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
-  @Get('trainer')
-  async getClientsByTrainerId(@Query('trainerId') trainerId: string) {
-    return await this.clientService.getClientsByTrainerId(trainerId);
+  @Get('trainer/:trainerId')
+  async getClientsByTrainerId(@Param() params: any) {
+    return await this.clientService.getClientsByTrainerId(params.trainerId);
   }
 
   @Post('search-clients')

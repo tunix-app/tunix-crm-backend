@@ -23,6 +23,5 @@ async function bootstrap() {
   const port = process.env.PORT ? Number(process.env.PORT) : 3000;
   Logger.log(`Starting server on port ${port}`, 'Bootstrap');
   await app.listen(port);
-  Logger.log(`Server started on port ${port}`, 'Bootstrap');
 }
 bootstrap();

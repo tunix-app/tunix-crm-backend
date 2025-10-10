@@ -1,4 +1,4 @@
-import { IsArray, IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class Client {
   id: string;
@@ -29,16 +29,20 @@ export class CreateClientDto {
   client_email: string;
 
   @IsString()
+  @IsOptional()
   client_phone?: string;
 
   @IsArray()
+  @IsOptional()
   goals?: string[];
 }
 
 export class UpdateClientDto {
   @IsString()
+  @IsOptional()
   current_program?: string;
 
   @IsArray()
+  @IsOptional()
   goals?: string[];
 }

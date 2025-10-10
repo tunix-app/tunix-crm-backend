@@ -19,6 +19,7 @@ export class ClientService {
   constructor(private readonly knexService: KnexService) {}
 
   async getClientsByTrainerId(trainerId: string): Promise<Client[]> {
+    this.logger.debug(`Fetching clients for trainer ID: ${trainerId}`);
     try {
       const clients: ClientEntity[] = await this.knexService
         .db('clients as C')
@@ -57,8 +58,7 @@ export class ClientService {
   }
 
   async searchClients(query: string): Promise<Client[]> {
-    // SELECT * FROM clients WHERE email ILIKE '%query%' OR phone ILIKE '%query%' OR first_name ILIKE '%query%' OR last_name ILIKE '%query%'
-
+    this.logger.debug(`Searching clients with query: ${query}`);
     try {
       const clients: ClientEntity[] = await this.knexService
         .db('clients as C')
@@ -69,15 +69,14 @@ export class ClientService {
           'U.first_name',
           'U.last_name',
           'U.email',
-          'C.phone',
+          'U.phone',
           'C.is_active',
           'C.last_session',
           'C.next_session',
           'C.current_program',
         )
         .where(function () {
-          this.whereILike('U.email', `%${query}%`)
-            .orWhereILike('U.first_name', `%${query}%`)
+          this.whereILike('U.first_name', `%${query}%`)
             .orWhereILike('U.last_name', `%${query}%`);
         });
 
@@ -114,6 +113,7 @@ export class ClientService {
       non existing user, existing mapping ==> not possible
     
     */
+   this.logger.debug(`Creating client for trainer ID: ${trainerId}`);
     try {
       const [firstName, lastName] = createClient.client_name.split(' ');
 
@@ -121,23 +121,31 @@ export class ClientService {
         .db('users')
         .where('first_name', firstName)
         .andWhere('last_name', lastName)
-        .andWhere('email', createClient.client_email)
+        .orWhere('email', createClient.client_email)
         .first();
 
-      const existingMapping = await this.knexService
-        .db('clients')
-        .where('client_id', existingUser.id)
-        .first();
+      this.logger.debug(`Existing user: ${JSON.stringify(existingUser)}`);
 
-      if (existingUser && existingMapping) {
-        this.logger.warn(
-          `Client already mapped to trainer - ${existingMapping.trainer_id}`,
-        );
+      let newclientId = '';
 
-        throw new BadRequestException('Client already mapped to a trainer');
-      }
+      if (existingUser) {
+        const existingMapping = await this.knexService
+          .db('clients')
+          .where('client_id', existingUser.id)
+          .first();
 
-      if (!existingUser) {
+        this.logger.debug(`Existing mapping: ${JSON.stringify(existingMapping)}`);
+
+        if (existingMapping) {
+          this.logger.warn(
+            `Client already mapped to trainer - ${existingMapping.trainer_id}`,
+          );
+          throw new BadRequestException('Client already mapped to a trainer');
+        }
+
+
+      } else {
+        this.logger.debug(`Creating new user ${createClient.client_name}`);
         const newUserPhone = createClient?.client_phone || undefined;
         const newUser = {
           email: createClient.client_email,
@@ -147,14 +155,16 @@ export class ClientService {
           phone: newUserPhone,
         };
 
-        await this.knexService.db('users').insert(newUser).returning('*');
+        const insertResult =await this.knexService.db('users').insert(newUser).returning('*');
+        newclientId = insertResult[0].id;
+        this.logger.debug(`New user created with ID: ${newclientId}`);
       }
 
       const newClient = await this.knexService
         .db('clients')
         .insert({
           trainer_id: trainerId,
-          client_id: existingUser.id,
+          client_id: newclientId,
           is_active: true,
           goals: createClient?.goals ?? undefined,
         })
@@ -163,7 +173,7 @@ export class ClientService {
       return { message: 'Client created successfully', client: newClient };
     } catch (error) {
       this.logger.error('Error creating client', error);
-      return null;
+      throw new BadRequestException(error.message || 'Failed to create client');
     }
   }
 
@@ -179,11 +189,12 @@ export class ClientService {
           'U.first_name',
           'U.last_name',
           'U.email',
-          'C.phone',
+          'U.phone',
           'C.is_active',
           'C.last_session',
           'C.next_session',
           'C.current_program',
+          'C.goals',
         )
         .where('C.id', id)
         .first();
@@ -201,6 +212,7 @@ export class ClientService {
         last_session: client.last_session ?? new Date(''),
         next_session: client.next_session ?? new Date(''),
         current_program: client.current_program,
+        goals: client.goals,
       };
     } catch (error) {
       this.logger.error('Error fetching client by ID', error);
@@ -237,11 +249,12 @@ export class ClientService {
           'U.first_name',
           'U.last_name',
           'U.email',
-          'C.phone',
+          'U.phone',
           'C.is_active',
           'C.last_session',
           'C.next_session',
           'C.current_program',
+          'C.goals',
         )
         .where('C.id', id)
         .first();
@@ -255,6 +268,7 @@ export class ClientService {
         last_session: client.last_session ?? new Date(''),
         next_session: client.next_session ?? new Date(''),
         current_program: client.current_program,
+        goals: client.goals,
       };
     } catch (error) {
       this.logger.error('Error updating client', error);
@@ -269,6 +283,7 @@ export class ClientService {
         .where('id', id)
         .update({ is_active: false });
 
+      this.logger.debug(`Client with ID: ${id} decommissioned`);
       return { message: 'Client decommissioned successfully' };
     } catch (error) {
       this.logger.error('Error decommissioning client', error);
