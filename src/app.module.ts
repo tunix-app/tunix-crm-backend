@@ -8,6 +8,7 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { ClientModule } from './client/client.module';
 import { SessionModule } from './session/session.module';
+import { NoteModule } from './note/note.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { SessionModule } from './session/session.module';
     UserModule,
     ClientModule,
     SessionModule,
+    NoteModule,
   ],
   controllers: [AppController],
   providers: [AppService],

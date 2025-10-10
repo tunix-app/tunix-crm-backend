@@ -1,9 +1,18 @@
-export type Session = {
+export type SessionEntity = {
   id: string;
-  client_id: string; // references clients.id
+  client_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  session_type: SessionType;
   start_time: Date;
   end_time: Date;
-  created_at: Date;
-  updated_at: Date;
-  session_type: string;
+  description: string;
 };
+
+export enum SessionType {
+  STRETCH = 'Stretch',
+  TRAINING = 'Personal Training',
+  GROUP_TRAINING = 'Group Training',
+  NEURO_RECON = 'Neuromuscular Reconstruction',
+}

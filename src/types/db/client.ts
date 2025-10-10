@@ -1,12 +1,13 @@
-export type Client = {
+export type ClientEntity = {
   id: string;
-  trainer_id: string; // references users.id
   client_id: string;
+  trainer_id?: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
   is_active: boolean;
-  created_at: Date;
-  updated_at: Date;
-  last_session: Date;
-  next_session: Date;
-  current_progran: string;
-  goals: string;
+  last_session?: Date;
+  next_session?: Date;
+  current_program?: string;
+  goals?: string[];
 };

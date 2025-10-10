@@ -8,39 +8,54 @@ import {
   Post,
 } from '@nestjs/common';
 import { ClientService } from './services/client.service';
-import { CreateClientDto, UpdateClientDto } from './dto/client.dto';
+import {
+  Client,
+  CreateClientDto,
+  SearchClientDto,
+  UpdateClientDto,
+} from 'src/types/dto/client.dto';
+import { ClientEntity } from 'src/types/db/client';
 
 @Controller('client')
 export class ClientController {
   constructor(private readonly clientService: ClientService) {}
 
-  @Post()
-  async createClient(@Body() createClient: CreateClientDto) {
-    return this.clientService.createClient(createClient);
+  @Get('trainer/:trainerId')
+  async getClientsByTrainerId(@Param() params: any): Promise<Client[]> {
+    return await this.clientService.getClientsByTrainerId(params.trainerId);
+  }
+
+  @Post('search-clients')
+  async searchClients(@Body() body: SearchClientDto): Promise<Client[]> {
+    return await this.clientService.searchClients(body.query);
   }
 
   @Get(':id')
-  async getClientById(@Param('clientId') clientId: string) {
-    return this.clientService.getClientById(clientId);
+  async getClientById(@Param() params: any): Promise<Client> {
+    return await this.clientService.getClientById(params.id);
   }
 
-  // Get all clients for a specific user id
-  @Get('/trainer/:trainerId')
-  async getAllActiveClients(@Param('trainerId') trainerId: string) {
-    return this.clientService.getClientsByTrainerId(trainerId);
+  @Post('/trainer/:trainerId')
+  async registerNewclient(
+    @Param() params: any,
+    @Body() createClientDto: CreateClientDto,
+  ): Promise<{ message: string; client: ClientEntity[] }> {
+    return await this.clientService.createClient(
+      params.trainerId,
+      createClientDto,
+    );
   }
 
   @Patch(':id')
   async updateClient(
-    @Param('clientId') clientId: string,
+    @Param() params: any,
     @Body() updateData: UpdateClientDto,
-  ) {
-    return this.clientService.updateClient(clientId, updateData);
+  ): Promise<Client> {
+    return await this.clientService.updateClient(params.id, updateData);
   }
 
   @Delete(':id')
-  async decommissionClient(@Param('clientId') clientId: string) {
-    return this.clientService.decommissionClient(clientId);
+  async decommisionClient(@Param() params: any): Promise<{ message: string }> {
+    return await this.clientService.decommissionClient(params.id);
   }
-  // soft delete, mark is_active to false
 }

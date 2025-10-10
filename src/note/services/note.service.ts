@@ -1,0 +1,103 @@
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { KnexService } from 'src/infra/database/knex.service';
+import { NoteEntity } from 'src/types/db/note';
+import { Note } from 'src/types/dto/note.dto';
+
+@Injectable()
+export class NoteService {
+  private readonly logger = new Logger(NoteService.name);
+
+  constructor(private readonly knexService: KnexService) {}
+
+  async getNotesByClientId(clientId: string): Promise<Note[]> {
+    this.logger.debug(`Fetching notes for client ${clientId}`);
+    try {
+      const notes: NoteEntity[] = await this.knexService
+        .db('notes as N')
+        .where('N.client_id', clientId)
+        .select('*');
+
+      const result: Note[] = notes.map((n) => {
+        return {
+          id: n.id,
+          client_id: n.client_id,
+          tags: n.tags,
+          content: n.content,
+          date: n.updated_at ? n.updated_at : n.created_at,
+        } as Note;
+      });
+
+      return result;
+    } catch (error) {
+      this.logger.error(
+        `Failed to get notes for client ${clientId}`,
+        error.stack,
+      );
+      throw error;
+    }
+  }
+
+  async createNote(
+    clientId: string,
+    newNote: any,
+  ): Promise<{ message: string }> {
+    this.logger.debug(`Creating note for client ${clientId}`);
+    try {
+      const existingClient = await this.knexService
+        .db('clients')
+        .where('client_id', clientId)
+        .first();
+
+      if (!existingClient) {
+        throw new BadRequestException(`Client with id ${clientId} not found`);
+      }
+
+      const newNoteEntity = {
+        client_id: clientId,
+        tags: newNote.tags ?? null,
+        content: newNote.content,
+        created_at: new Date(),
+      };
+
+      await this.knexService.db('notes').insert(newNoteEntity).returning('*');
+
+      return { message: `Note created for client ${clientId}` };
+    } catch (error) {
+      this.logger.error(
+        `Failed to create note for client ${clientId}`,
+        error.stack,
+      );
+      throw new BadRequestException('Failed to create note', error.message);
+    }
+  }
+
+  async updateNote(id: string, updateNote: any): Promise<{ message: string }> {
+    this.logger.debug(`Updating note ${id}`);
+    try {
+      await this.knexService
+        .db('notes')
+        .where('id', id)
+        .update({
+          ...updateNote,
+          updated_at: new Date(),
+        })
+        .returning('*');
+
+      return { message: `Note ${id} updated successfully` };
+    } catch (error) {
+      this.logger.error(`Failed to update note ${id}`, error.stack);
+      throw new Error('Failed to update note', error.message);
+    }
+  }
+
+  async deleteNote(id: string): Promise<{ message: string }> {
+    this.logger.debug(`Deleting note ${id}`);
+    try {
+      await this.knexService.db('notes').where('id', id).del();
+      return { message: 'Note deleted successfully' };
+    } catch (error) {
+      this.logger.error(`Failed to delete note ${id}`, error.stack);
+      throw error;
+    }
+  }
+}
