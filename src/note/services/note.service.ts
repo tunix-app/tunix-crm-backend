@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, Logger } from '@nestjs/common';
 import { KnexService } from 'src/infra/database/knex.service';
 import { NoteEntity } from 'src/types/db/note';
 import { Note } from 'src/types/dto/note.dto';
@@ -22,7 +22,7 @@ export class NoteService {
           client_id: n.client_id,
           tags: n.tags,
           content: n.content,
-          date: n.updated_at,
+          date: n.updated_at ? n.updated_at : n.created_at,
         } as Note;
       });
 
@@ -38,9 +38,18 @@ export class NoteService {
 
   async createNote(clientId: string, newNote: any) {
     try {
+      const existingClient = await this.knexService
+        .db('clients')
+        .where('client_id', clientId)
+        .first();
+
+      if (!existingClient) {
+        throw new BadRequestException(`Client with id ${clientId} not found`);
+      }
+
       const newNoteEntity = {
         client_id: clientId,
-        tags: newNote.tags || [],
+        tags: newNote.tags ?? null,
         content: newNote.content,
         created_at: new Date(),
       };
@@ -53,7 +62,7 @@ export class NoteService {
         `Failed to create note for client ${clientId}`,
         error.stack,
       );
-      throw error;
+      throw new BadRequestException('Failed to create note', error.message);
     }
   }
 
@@ -71,7 +80,7 @@ export class NoteService {
       return { message: `Note ${id} updated successfully` };
     } catch (error) {
       this.logger.error(`Failed to update note ${id}`, error.stack);
-      throw error;
+      throw new Error('Failed to update note', error.message);
     }
   }
 
