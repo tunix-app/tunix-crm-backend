@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { KnexService } from '../../infra/database/knex.service';
 import {
   CreateSessionDto,
@@ -12,6 +12,13 @@ export class SessionService {
   private readonly logger = new Logger(SessionService.name);
 
   constructor(private readonly knexService: KnexService) {}
+
+  private readonly sessionMap = {
+    STRETCH: 'Stretch',
+    TRAINING: 'Personal Training',
+    GROUP_TRAINING: 'Group Training',
+    NEURO_RECON: 'Neuromuscular Reconstruction',
+  };
 
   async getSessionsByTimeRange(
     trainerId: string,
@@ -65,6 +72,16 @@ export class SessionService {
   async getSessionById(sessionId: string): Promise<Session> {
     this.logger.debug(`Retrieving Session by ID: ${sessionId}`);
     try {
+      const existingSession = await this.knexService
+        .db('sessions')
+        .where('id', sessionId)
+        .first();
+
+      if (!existingSession) {
+        this.logger.warn(`Session with ID ${sessionId} does not exist`);
+        throw new Error('Session does not exist');
+      }
+
       const session: SessionEntity = await this.knexService
         .db('sessions as S')
         .join('users as U', 'S.client_id', 'U.id')
@@ -96,7 +113,7 @@ export class SessionService {
       return result;
     } catch (error) {
       this.logger.error('Error fetching session by ID', error);
-      throw error;
+      throw new BadRequestException('Failed to fetch session', error.message);
     }
   }
 
@@ -116,8 +133,8 @@ export class SessionService {
 
       const conflictingSessions = await this.knexService
         .db('sessions')
-        .where('start_time', '<', createSession.end_time)
-        .where('end_time', '>', createSession.start_time);
+        .where('start_time', '<=', createSession.end_time)
+        .where('end_time', '>=', createSession.start_time);
 
       if (conflictingSessions.length > 0) {
         this.logger.warn(
@@ -126,17 +143,14 @@ export class SessionService {
         throw new Error('Session time conflict');
       }
 
-      const [firstName, lastName] = createSession.client_name.split(' ');
 
       const dbSession = {
         client_id: createSession.client_id,
-        first_name: firstName,
-        last_name: lastName,
-        email: createSession.client_email,
-        session_type: createSession.session_type,
+        trainer_id: createSession.trainer_id,
+        session_type: this.sessionMap[createSession.session_type],
         start_time: new Date(createSession.start_time),
         end_time: new Date(createSession.end_time),
-        description: createSession.description,
+        description: createSession?.description ?? null,
       };
 
       const newSession: Session[] = await this.knexService
@@ -147,7 +161,7 @@ export class SessionService {
       return newSession[0];
     } catch (error) {
       this.logger.error('Error creating new session', error);
-      throw error;
+      throw new BadRequestException('Failed to create session', error.message);
     }
   }
 
@@ -156,14 +170,21 @@ export class SessionService {
     updateData: UpdateSessionDto,
   ): Promise<Session> {
     try {
-      const startTime = updateData.start_time ?? undefined;
-      const endTime = updateData.end_time ?? undefined;
+      const existingSession = await this.knexService
+        .db('sessions')
+        .where('id', sessionId)
+        .first();
+
+      if (!existingSession) {
+        this.logger.warn(`Session with ID ${sessionId} does not exist`);
+        throw new Error('Session does not exist');
+      }
 
       const dbSession = {
-        session_type: updateData.session_type,
-        start_time: startTime,
-        end_time: endTime,
-        description: updateData.description,
+        session_type: updateData.session_type ?? undefined,
+        start_time: updateData.start_time ?? undefined,
+        end_time: updateData.end_time ?? undefined,
+        description: updateData.description ?? undefined,
       };
 
       const updatedSession: Session[] = await this.knexService
@@ -175,7 +196,7 @@ export class SessionService {
       return updatedSession[0];
     } catch (error) {
       this.logger.error('Error updating session', error);
-      throw error;
+      throw new BadRequestException('Failed to update session', error.message);
     }
   }
 

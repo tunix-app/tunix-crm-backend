@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 import { SessionType } from '../db/session';
 
 export class Session {
@@ -26,6 +26,10 @@ export class CreateSessionDto {
   @IsNotEmpty()
   client_id: string;
 
+  @IsUUID()
+  @IsNotEmpty()
+  trainer_id: string;
+
   @IsString()
   @IsNotEmpty()
   client_name: string;
@@ -50,14 +54,18 @@ export class CreateSessionDto {
 
 export class UpdateSessionDto {
   @IsString()
+  @IsOptional()
   session_type?: string;
 
   @IsString()
+  @IsOptional()
   start_time?: string;
 
   @IsString()
+  @IsOptional()
   end_time?: string;
 
   @IsString()
+  @IsOptional()
   description?: string;
 }
