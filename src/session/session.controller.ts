@@ -11,6 +11,7 @@ import { SessionService } from './services/session.service';
 import {
   CreateSessionDto,
   GetSessionRangeDto,
+  Session,
   UpdateSessionDto,
 } from '../types/dto/session.dto';
 
@@ -22,7 +23,7 @@ export class SessionController {
   async getSessionsByTimeRange(
     @Param() params: any,
     @Body() body: GetSessionRangeDto,
-  ) {
+  ): Promise<Session[]> {
     const response = await this.sessionService.getSessionsByTimeRange(
       params.trainerId,
       body.start_range,
@@ -33,12 +34,14 @@ export class SessionController {
   }
 
   @Get(':id')
-  async getSessionById(@Param() params: any) {
+  async getSessionById(@Param() params: any): Promise<Session> {
     return await this.sessionService.getSessionById(params.id);
   }
 
   @Post()
-  async createNewSession(@Body() createSession: CreateSessionDto) {
+  async createNewSession(
+    @Body() createSession: CreateSessionDto,
+  ): Promise<Session> {
     return await this.sessionService.createNewSession(createSession);
   }
 
@@ -46,12 +49,12 @@ export class SessionController {
   async updateSession(
     @Param() params: any,
     @Body() updateData: UpdateSessionDto,
-  ) {
+  ): Promise<Session> {
     return await this.sessionService.updateSession(params.id, updateData);
   }
 
   @Delete(':id')
-  async cancelSession(@Param() params: any) {
+  async cancelSession(@Param() params: any): Promise<{ message: string }> {
     return await this.sessionService.cancelSession(params.id);
   }
 }

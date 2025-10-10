@@ -76,8 +76,10 @@ export class ClientService {
           'C.current_program',
         )
         .where(function () {
-          this.whereILike('U.first_name', `%${query}%`)
-            .orWhereILike('U.last_name', `%${query}%`);
+          this.whereILike('U.first_name', `%${query}%`).orWhereILike(
+            'U.last_name',
+            `%${query}%`,
+          );
         });
 
       const result: Client[] = clients.map((c) => {
@@ -103,7 +105,7 @@ export class ClientService {
   async createClient(
     trainerId: string,
     createClient: CreateClientDto,
-  ): Promise<any> {
+  ): Promise<{ message: string; client: ClientEntity[] }> {
     /*
       Scenarios:
       non existing user, no existing mapping ==> create user and client mapping (new UUIDs)
@@ -113,7 +115,7 @@ export class ClientService {
       non existing user, existing mapping ==> not possible
     
     */
-   this.logger.debug(`Creating client for trainer ID: ${trainerId}`);
+    this.logger.debug(`Creating client for trainer ID: ${trainerId}`);
     try {
       const [firstName, lastName] = createClient.client_name.split(' ');
 
@@ -134,7 +136,9 @@ export class ClientService {
           .where('client_id', existingUser.id)
           .first();
 
-        this.logger.debug(`Existing mapping: ${JSON.stringify(existingMapping)}`);
+        this.logger.debug(
+          `Existing mapping: ${JSON.stringify(existingMapping)}`,
+        );
 
         if (existingMapping) {
           this.logger.warn(
@@ -142,8 +146,6 @@ export class ClientService {
           );
           throw new BadRequestException('Client already mapped to a trainer');
         }
-
-
       } else {
         this.logger.debug(`Creating new user ${createClient.client_name}`);
         const newUserPhone = createClient?.client_phone || undefined;
@@ -155,12 +157,15 @@ export class ClientService {
           phone: newUserPhone,
         };
 
-        const insertResult =await this.knexService.db('users').insert(newUser).returning('*');
+        const insertResult = await this.knexService
+          .db('users')
+          .insert(newUser)
+          .returning('*');
         newclientId = insertResult[0].id;
         this.logger.debug(`New user created with ID: ${newclientId}`);
       }
 
-      const newClient = await this.knexService
+      const newClient: ClientEntity[] = await this.knexService
         .db('clients')
         .insert({
           trainer_id: trainerId,
@@ -277,7 +282,7 @@ export class ClientService {
     }
   }
 
-  async decommissionClient(id: string): Promise<any> {
+  async decommissionClient(id: string): Promise<{ message: string }> {
     try {
       this.logger.debug(`Decommissioning client with ID: ${id}`);
       await this.knexService

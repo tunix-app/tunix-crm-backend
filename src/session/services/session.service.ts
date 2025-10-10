@@ -119,7 +119,9 @@ export class SessionService {
 
   async createNewSession(createSession: CreateSessionDto): Promise<Session> {
     try {
-      this.logger.debug(`Creating new session for client ID ${createSession.client_id}`);
+      this.logger.debug(
+        `Creating new session for client ID ${createSession.client_id}`,
+      );
       const existingClient = await this.knexService
         .db('clients')
         .where('client_id', createSession.client_id)
@@ -143,7 +145,6 @@ export class SessionService {
         );
         throw new Error('Session time conflict');
       }
-
 
       const dbSession = {
         client_id: createSession.client_id,

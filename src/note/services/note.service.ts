@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { KnexService } from 'src/infra/database/knex.service';
 import { NoteEntity } from 'src/types/db/note';
 import { Note } from 'src/types/dto/note.dto';
@@ -9,7 +9,7 @@ export class NoteService {
 
   constructor(private readonly knexService: KnexService) {}
 
-  async getNotesByClientId(clientId: string) {
+  async getNotesByClientId(clientId: string): Promise<Note[]> {
     this.logger.debug(`Fetching notes for client ${clientId}`);
     try {
       const notes: NoteEntity[] = await this.knexService
@@ -37,7 +37,10 @@ export class NoteService {
     }
   }
 
-  async createNote(clientId: string, newNote: any) {
+  async createNote(
+    clientId: string,
+    newNote: any,
+  ): Promise<{ message: string }> {
     this.logger.debug(`Creating note for client ${clientId}`);
     try {
       const existingClient = await this.knexService
@@ -68,7 +71,7 @@ export class NoteService {
     }
   }
 
-  async updateNote(id: string, updateNote: any) {
+  async updateNote(id: string, updateNote: any): Promise<{ message: string }> {
     this.logger.debug(`Updating note ${id}`);
     try {
       await this.knexService
@@ -87,7 +90,7 @@ export class NoteService {
     }
   }
 
-  async deleteNote(id: string) {
+  async deleteNote(id: string): Promise<{ message: string }> {
     this.logger.debug(`Deleting note ${id}`);
     try {
       await this.knexService.db('notes').where('id', id).del();
