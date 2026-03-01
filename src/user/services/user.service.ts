@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { KnexService } from '../../infra/database/knex.service';
 import { CreateUserDto } from '../dto/user.dto';
-import { User } from 'src/types/db/user';
+import { User, UserRole } from 'src/types/db/user';
 
 const ALLOWED_COLUMNS = [
   'email',
@@ -40,6 +40,12 @@ export class UserService {
       throw new NotFoundException(`User with id ${id} not found`);
     }
     return user;
+  }
+
+  async getSuperusers(): Promise<User[]> {
+    return this.knexService
+      .db('users')
+      .whereIn('role', [UserRole.ADMIN, UserRole.COACH]);
   }
 
   async updateUser(id: string, updateData: any): Promise<User> {

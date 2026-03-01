@@ -14,6 +14,12 @@ export class UserController {
     return this.userService.createUser(createUser);
   }
 
+  @ApiOperation({ summary: 'Get all users with Admin or Coach role' })
+  @Get('superusers')
+  async getSuperusers() {
+    return this.userService.getSuperusers();
+  }
+
   @ApiOperation({ summary: 'Get a user by ID' })
   @ApiParam({ name: 'id', description: 'User UUID' })
   @Get(':id')
