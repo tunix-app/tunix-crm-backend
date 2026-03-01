@@ -18,10 +18,13 @@ describe('UserService', () => {
   });
   const mockInsert = jest.fn().mockReturnValue({ returning: mockReturning });
   
+  const mockWhereIn = jest.fn() as jest.Mock<any>;
+
   const mockDb = jest.fn().mockReturnValue({
     insert: mockInsert,
     where: mockWhere,
     update: mockUpdate,
+    whereIn: mockWhereIn,
   });
 
   beforeEach(async () => {
@@ -128,6 +131,30 @@ describe('UserService', () => {
       await expect(service.getUserById(userId)).rejects.toThrow(
         NotFoundException,
       );
+    });
+  });
+
+  describe('getSuperusers', () => {
+    it('should return users with Admin or Coach role', async () => {
+      const superusers = [
+        { id: '1', email: 'admin@example.com', role: UserRole.ADMIN },
+        { id: '2', email: 'coach@example.com', role: UserRole.COACH },
+      ];
+      mockWhereIn.mockResolvedValue(superusers);
+
+      const result = await service.getSuperusers();
+
+      expect(mockDb).toHaveBeenCalledWith('users');
+      expect(mockWhereIn).toHaveBeenCalledWith('role', [UserRole.ADMIN, UserRole.COACH]);
+      expect(result).toEqual(superusers);
+    });
+
+    it('should return an empty array when no superusers exist', async () => {
+      mockWhereIn.mockResolvedValue([]);
+
+      const result = await service.getSuperusers();
+
+      expect(result).toEqual([]);
     });
   });
 
