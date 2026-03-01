@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { KnexService } from '../../infra/database/knex.service';
 import { CreateUserDto } from '../dto/user.dto';
-import { User, UserRole } from 'src/types/db/user';
+import { User, UserRole } from '../../types/db/user';
 
 const ALLOWED_COLUMNS = [
   'email',
