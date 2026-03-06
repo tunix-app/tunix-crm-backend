@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule } from './config/config.module';
 import { KnexModule } from './infra/database/knex.module';
 import { SupabaseModule } from './infra/supabase/supabase.module';
 import { HealthModule } from './health/health.module';
@@ -14,7 +14,7 @@ import { WaiverModule } from './waiver/waiver.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule,
     KnexModule,
     SupabaseModule,
     HealthModule,
