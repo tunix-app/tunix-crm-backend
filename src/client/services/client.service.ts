@@ -10,7 +10,7 @@ import {
   CreateClientDto,
   UpdateClientDto,
 } from 'src/types/dto/client.dto';
-import { ClientEntity } from 'src/types/db/client';
+import { ClientEntity, ClientWithUser } from 'src/types/db/client';
 
 @Injectable()
 export class ClientService {
@@ -21,7 +21,7 @@ export class ClientService {
   async getClientsByTrainerId(trainerId: string): Promise<Client[]> {
     this.logger.debug(`Fetching clients for trainer ID: ${trainerId}`);
     try {
-      const clients: ClientEntity[] = await this.knexService
+      const clients: ClientWithUser[] = await this.knexService
         .db('clients as C')
         .join('users as U', 'C.client_id', 'U.id')
         .select(
@@ -60,7 +60,7 @@ export class ClientService {
   async searchClients(query: string): Promise<Client[]> {
     this.logger.debug(`Searching clients with query: ${query}`);
     try {
-      const clients: ClientEntity[] = await this.knexService
+      const clients: ClientWithUser[] = await this.knexService
         .db('clients as C')
         .join('users as U', 'C.client_id', 'U.id')
         .select(
@@ -69,7 +69,6 @@ export class ClientService {
           'U.first_name',
           'U.last_name',
           'U.email',
-          'U.phone',
           'C.is_active',
           'C.last_session',
           'C.next_session',
@@ -148,13 +147,11 @@ export class ClientService {
         }
       } else {
         this.logger.debug(`Creating new user ${createClient.client_name}`);
-        const newUserPhone = createClient?.client_phone || undefined;
         const newUser = {
           email: createClient.client_email,
           role: 'Client',
           first_name: firstName,
           last_name: lastName,
-          phone: newUserPhone,
         };
 
         const insertResult = await this.knexService
@@ -185,7 +182,7 @@ export class ClientService {
   async getClientById(id: string): Promise<Client> {
     this.logger.debug(`Fetching client with ID: ${id}`);
     try {
-      const client: ClientEntity = await this.knexService
+      const client: ClientWithUser = await this.knexService
         .db('clients as C')
         .join('users as U', 'C.client_id', 'U.id')
         .select(
@@ -194,7 +191,6 @@ export class ClientService {
           'U.first_name',
           'U.last_name',
           'U.email',
-          'U.phone',
           'C.is_active',
           'C.last_session',
           'C.next_session',
@@ -246,7 +242,7 @@ export class ClientService {
         throw new NotFoundException('Client not found');
       }
 
-      const client: ClientEntity = await this.knexService
+      const client: ClientWithUser = await this.knexService
         .db('clients as C')
         .join('users as U', 'C.client_id', 'U.id')
         .select(
@@ -255,7 +251,6 @@ export class ClientService {
           'U.first_name',
           'U.last_name',
           'U.email',
-          'U.phone',
           'C.is_active',
           'C.last_session',
           'C.next_session',
