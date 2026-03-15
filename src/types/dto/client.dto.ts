@@ -37,7 +37,10 @@ export class CreateClientDto {
   @IsOptional()
   client_phone?: string;
 
-  @ApiPropertyOptional({ example: ['Lose weight', 'Build strength'], type: [String] })
+  @ApiPropertyOptional({
+    example: ['Lose weight', 'Build strength'],
+    type: [String],
+  })
   @IsArray()
   @IsOptional()
   goals?: string[];
@@ -64,7 +67,10 @@ export class UpdateClientDto {
   @IsOptional()
   current_program?: string;
 
-  @ApiPropertyOptional({ example: ['Run 5k', 'Improve mobility'], type: [String] })
+  @ApiPropertyOptional({
+    example: ['Run 5k', 'Improve mobility'],
+    type: [String],
+  })
   @IsArray()
   @IsOptional()
   goals?: string[];

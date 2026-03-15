@@ -15,11 +15,17 @@ export class Session {
 
 // --- INPUT DTOs ---
 export class GetSessionRangeDto {
-  @ApiProperty({ example: '2025-01-01T00:00:00Z', description: 'Start of date range (ISO 8601)' })
+  @ApiProperty({
+    example: '2025-01-01T00:00:00Z',
+    description: 'Start of date range (ISO 8601)',
+  })
   @IsNotEmpty()
   start_range: string;
 
-  @ApiProperty({ example: '2025-01-31T23:59:59Z', description: 'End of date range (ISO 8601)' })
+  @ApiProperty({
+    example: '2025-01-31T23:59:59Z',
+    description: 'End of date range (ISO 8601)',
+  })
   @IsNotEmpty()
   end_range: string;
 }
@@ -45,16 +51,25 @@ export class CreateSessionDto {
   @IsNotEmpty()
   client_email: string;
 
-  @ApiProperty({ example: 'strength', description: 'Session type (e.g. strength, cardio, mobility)' })
+  @ApiProperty({
+    example: 'strength',
+    description: 'Session type (e.g. strength, cardio, mobility)',
+  })
   @IsString()
   @IsNotEmpty()
   session_type: SessionType;
 
-  @ApiProperty({ example: '2025-06-01T09:00:00Z', description: 'Session start time (ISO 8601)' })
+  @ApiProperty({
+    example: '2025-06-01T09:00:00Z',
+    description: 'Session start time (ISO 8601)',
+  })
   @IsNotEmpty()
   start_time: string;
 
-  @ApiProperty({ example: '2025-06-01T10:00:00Z', description: 'Session end time (ISO 8601)' })
+  @ApiProperty({
+    example: '2025-06-01T10:00:00Z',
+    description: 'Session end time (ISO 8601)',
+  })
   @IsNotEmpty()
   end_time: string;
 

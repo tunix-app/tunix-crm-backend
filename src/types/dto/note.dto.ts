@@ -11,7 +11,9 @@ export class Note {
 
 // --- INPUT DTOs ---
 export class CreateNoteDto {
-  @ApiProperty({ example: 'Client showed great improvement in squat depth today.' })
+  @ApiProperty({
+    example: 'Client showed great improvement in squat depth today.',
+  })
   @IsString()
   @IsNotEmpty()
   content: string;

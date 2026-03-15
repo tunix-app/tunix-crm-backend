@@ -67,27 +67,21 @@ export class WaiverController {
   @Get('client/:clientId')
   @ApiOperation({ summary: 'Get all waivers for a client' })
   @ApiParam({ name: 'clientId', description: 'Client UUID (clients.id)' })
-  async getWaivers(
-    @Param('clientId') clientId: string,
-  ): Promise<WaiverDto[]> {
+  async getWaivers(@Param('clientId') clientId: string): Promise<WaiverDto[]> {
     return this.waiverService.getWaiversByClientId(clientId);
   }
 
   @Get(':id/url')
   @ApiOperation({ summary: 'Get a 1-hour signed download URL for a waiver' })
   @ApiParam({ name: 'id', description: 'Waiver UUID' })
-  async getSignedUrl(
-    @Param('id') id: string,
-  ): Promise<WaiverSignedUrlDto> {
+  async getSignedUrl(@Param('id') id: string): Promise<WaiverSignedUrlDto> {
     return this.waiverService.getSignedUrl(id);
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a waiver from storage and database' })
   @ApiParam({ name: 'id', description: 'Waiver UUID' })
-  async deleteWaiver(
-    @Param('id') id: string,
-  ): Promise<{ message: string }> {
+  async deleteWaiver(@Param('id') id: string): Promise<{ message: string }> {
     return this.waiverService.deleteWaiver(id);
   }
 }
