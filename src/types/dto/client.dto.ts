@@ -6,6 +6,7 @@ export class Client {
   client_id: string;
   client_name: string;
   client_email: string;
+  client_phone?: string;
   isActive: boolean;
   last_session: Date;
   next_session: Date;
