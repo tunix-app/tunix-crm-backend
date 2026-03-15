@@ -20,6 +20,20 @@ export class SessionService {
     NEURO_RECON: 'Neuromuscular Reconstruction',
   };
 
+  private toSessionResponse(s: SessionEntity): Session {
+    return {
+      id: s.id,
+      client_id: s.client_id,
+      client_name: `${s.first_name} ${s.last_name}`,
+      client_email: s.email,
+      session_type: s.session_type,
+      start_date: s.start_time,
+      end_date: s.end_time,
+      description: s.description,
+      tools_used: s.tools_used ?? null,
+    };
+  }
+
   async getSessionsByTimeRange(
     trainerId: string,
     startRange: string,
@@ -44,28 +58,49 @@ export class SessionService {
           'S.start_time',
           'S.end_time',
           'S.description',
+          'S.tools_used',
         )
         .where('S.trainer_id', trainerId)
         .where('S.start_time', '>=', startRange)
         .where('S.end_time', '<=', endRange);
 
-      const result: Session[] = sessionEntities.map((s) => {
-        return {
-          id: s.id,
-          client_id: s.client_id,
-          client_name: `${s.first_name} ${s.last_name}`,
-          client_email: s.email,
-          session_type: s.session_type,
-          start_date: s.start_time,
-          end_date: s.end_time,
-          description: s.description,
-        };
-      });
-
-      return result;
+      return sessionEntities.map((s) => this.toSessionResponse(s));
     } catch (error) {
       this.logger.error('Error fetching sessions by time range', error);
       return [];
+    }
+  }
+
+  async getSessionsByClientId(clientId: string): Promise<Session[]> {
+    this.logger.debug(`Retrieving sessions for client ID: ${clientId}`);
+
+    try {
+      const sessionEntities: SessionEntity[] = await this.knexService
+        .db('sessions as S')
+        .join('clients as C', 'S.client_id', 'C.client_id')
+        .join('users as U', 'S.client_id', 'U.id')
+        .select(
+          'S.id',
+          'S.client_id',
+          'U.first_name',
+          'U.last_name',
+          'U.email',
+          'S.session_type',
+          'S.start_time',
+          'S.end_time',
+          'S.description',
+          'S.tools_used',
+        )
+        .where('C.id', clientId)
+        .orderBy('S.start_time', 'desc');
+
+      return sessionEntities.map((s) => this.toSessionResponse(s));
+    } catch (error) {
+      this.logger.error('Error fetching sessions by client ID', error);
+      throw new BadRequestException(
+        'Failed to fetch client sessions',
+        error.message,
+      );
     }
   }
 
@@ -95,22 +130,12 @@ export class SessionService {
           'S.start_time',
           'S.end_time',
           'S.description',
+          'S.tools_used',
         )
         .where('S.id', sessionId)
         .first();
 
-      const result: Session = {
-        id: session.id,
-        client_id: session.client_id,
-        client_name: `${session.first_name} ${session.last_name}`,
-        client_email: session.email,
-        session_type: session.session_type,
-        start_date: session.start_time,
-        end_date: session.end_time,
-        description: session.description,
-      };
-
-      return result;
+      return this.toSessionResponse(session);
     } catch (error) {
       this.logger.error('Error fetching session by ID', error);
       throw new BadRequestException('Failed to fetch session', error.message);
@@ -153,14 +178,15 @@ export class SessionService {
         start_time: new Date(createSession.start_time),
         end_time: new Date(createSession.end_time),
         description: createSession?.description ?? null,
+        tools_used: createSession.tools_used ?? null,
       };
 
-      const newSession: Session[] = await this.knexService
+      const newSession: SessionEntity[] = await this.knexService
         .db('sessions')
         .insert(dbSession)
         .returning('*');
 
-      return newSession[0];
+      return this.toSessionResponse(newSession[0]);
     } catch (error) {
       this.logger.error('Error creating new session', error);
       throw new BadRequestException('Failed to create session', error.message);
@@ -188,15 +214,16 @@ export class SessionService {
         start_time: updateData.start_time ?? undefined,
         end_time: updateData.end_time ?? undefined,
         description: updateData.description ?? undefined,
+        tools_used: updateData.tools_used ?? undefined,
       };
 
-      const updatedSession: Session[] = await this.knexService
+      const updatedSession: SessionEntity[] = await this.knexService
         .db('sessions')
         .where('id', sessionId)
         .update(dbSession)
         .returning('*');
 
-      return updatedSession[0];
+      return this.toSessionResponse(updatedSession[0]);
     } catch (error) {
       this.logger.error('Error updating session', error);
       throw new BadRequestException('Failed to update session', error.message);
