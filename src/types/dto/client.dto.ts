@@ -44,6 +44,21 @@ export class CreateClientDto {
 }
 
 export class UpdateClientDto {
+  @ApiPropertyOptional({ example: 'Sam Torres' })
+  @IsString()
+  @IsOptional()
+  client_name?: string;
+
+  @ApiPropertyOptional({ example: 'sam.torres@example.com' })
+  @IsString()
+  @IsOptional()
+  client_email?: string;
+
+  @ApiPropertyOptional({ example: '5120939876' })
+  @IsString()
+  @IsOptional()
+  client_phone?: string;
+
   @ApiPropertyOptional({ example: 'Strength Program v2' })
   @IsString()
   @IsOptional()
