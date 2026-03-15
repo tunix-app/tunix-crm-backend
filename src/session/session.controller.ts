@@ -37,6 +37,13 @@ export class SessionController {
     return response;
   }
 
+  @ApiOperation({ summary: 'Get all sessions for a client (session history)' })
+  @ApiParam({ name: 'clientId', description: 'Client UUID' })
+  @Get('client/:clientId')
+  async getSessionsByClientId(@Param() params: any): Promise<Session[]> {
+    return await this.sessionService.getSessionsByClientId(params.clientId);
+  }
+
   @ApiOperation({ summary: 'Get a session by ID' })
   @ApiParam({ name: 'id', description: 'Session UUID' })
   @Get(':id')
