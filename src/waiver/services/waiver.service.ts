@@ -84,7 +84,7 @@ export class WaiverService {
       .db('client_waivers')
       .where({ client_id: clientId })
       .orderBy('uploaded_at', 'desc');
-    return rows.map(this.toDto);
+    return rows.map((row) => this.toDto(row));
   }
 
   async getSignedUrl(waiverId: string): Promise<WaiverSignedUrlDto> {

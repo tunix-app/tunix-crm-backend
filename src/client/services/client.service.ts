@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   NotFoundException,
   Injectable,
   Logger,
@@ -227,19 +228,45 @@ export class ClientService {
   ): Promise<Client> {
     try {
       this.logger.debug(`Updating client with ID: ${id}`);
-      const updateData = {
-        current_program: updateClient.current_program,
-        goals: updateClient.goals,
-      };
 
-      const result = await this.knexService
+      const clientRow = await this.knexService
         .db('clients')
         .where('id', id)
-        .update(updateData)
-        .returning('*');
+        .first();
 
-      if (result.length === 0) {
+      if (!clientRow) {
         throw new NotFoundException('Client not found');
+      }
+
+      const clientsUpdate: Record<string, unknown> = {};
+      if (updateClient.current_program !== undefined)
+        clientsUpdate.current_program = updateClient.current_program;
+      if (updateClient.goals !== undefined)
+        clientsUpdate.goals = updateClient.goals;
+
+      if (Object.keys(clientsUpdate).length > 0) {
+        await this.knexService
+          .db('clients')
+          .where('id', id)
+          .update(clientsUpdate);
+      }
+
+      const usersUpdate: Record<string, unknown> = {};
+      if (updateClient.client_name !== undefined) {
+        const [firstName, ...rest] = updateClient.client_name.split(' ');
+        usersUpdate.first_name = firstName;
+        usersUpdate.last_name = rest.join(' ');
+      }
+      if (updateClient.client_email !== undefined)
+        usersUpdate.email = updateClient.client_email;
+      if (updateClient.client_phone !== undefined)
+        usersUpdate.phone = updateClient.client_phone;
+
+      if (Object.keys(usersUpdate).length > 0) {
+        await this.knexService
+          .db('users')
+          .where('id', clientRow.client_id)
+          .update(usersUpdate);
       }
 
       const client: ClientWithUser = await this.knexService
@@ -272,6 +299,7 @@ export class ClientService {
         goals: client.goals,
       };
     } catch (error) {
+      if (error instanceof HttpException) throw error;
       this.logger.error('Error updating client', error);
       throw new BadRequestException('Failed to update client');
     }

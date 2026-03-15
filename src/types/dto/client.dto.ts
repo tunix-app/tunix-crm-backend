@@ -37,19 +37,40 @@ export class CreateClientDto {
   @IsOptional()
   client_phone?: string;
 
-  @ApiPropertyOptional({ example: ['Lose weight', 'Build strength'], type: [String] })
+  @ApiPropertyOptional({
+    example: ['Lose weight', 'Build strength'],
+    type: [String],
+  })
   @IsArray()
   @IsOptional()
   goals?: string[];
 }
 
 export class UpdateClientDto {
+  @ApiPropertyOptional({ example: 'Sam Torres' })
+  @IsString()
+  @IsOptional()
+  client_name?: string;
+
+  @ApiPropertyOptional({ example: 'sam.torres@example.com' })
+  @IsString()
+  @IsOptional()
+  client_email?: string;
+
+  @ApiPropertyOptional({ example: '5120939876' })
+  @IsString()
+  @IsOptional()
+  client_phone?: string;
+
   @ApiPropertyOptional({ example: 'Strength Program v2' })
   @IsString()
   @IsOptional()
   current_program?: string;
 
-  @ApiPropertyOptional({ example: ['Run 5k', 'Improve mobility'], type: [String] })
+  @ApiPropertyOptional({
+    example: ['Run 5k', 'Improve mobility'],
+    type: [String],
+  })
   @IsArray()
   @IsOptional()
   goals?: string[];
