@@ -82,9 +82,10 @@ export class CreateSessionDto {
   @IsNotEmpty()
   end_time: string;
 
-  @ApiProperty({ example: 'Focus on upper body compound lifts' })
+  @ApiPropertyOptional({ example: 'Focus on upper body compound lifts' })
   @IsString()
-  description: string;
+  @IsOptional()
+  description?: string;
 
   @ApiPropertyOptional({
     example: ['Cupping', 'Hyper volt'],

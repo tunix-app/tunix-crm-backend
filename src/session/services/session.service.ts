@@ -166,7 +166,7 @@ export class SessionService {
       }
 
       const dbSession = {
-        client_id: createSession.client_id,
+        client_id: existingClient.client_id,
         trainer_id: createSession.trainer_id,
         session_type: createSession.session_type,
         start_time: new Date(createSession.start_time),
