@@ -13,13 +13,6 @@ export class SessionService {
 
   constructor(private readonly knexService: KnexService) {}
 
-  private readonly sessionMap = {
-    STRETCH: 'Stretch',
-    TRAINING: 'Personal Training',
-    GROUP_TRAINING: 'Group Training',
-    NEURO_RECON: 'Neuromuscular Reconstruction',
-  };
-
   private toSessionResponse(s: SessionEntity): Session {
     return {
       id: s.id,
@@ -174,7 +167,7 @@ export class SessionService {
       const dbSession = {
         client_id: createSession.client_id,
         trainer_id: createSession.trainer_id,
-        session_type: this.sessionMap[createSession.session_type],
+        session_type: createSession.session_type,
         start_time: new Date(createSession.start_time),
         end_time: new Date(createSession.end_time),
         description: createSession?.description ?? null,

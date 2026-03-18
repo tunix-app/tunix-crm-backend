@@ -60,10 +60,11 @@ export class CreateSessionDto {
   client_email: string;
 
   @ApiProperty({
-    example: 'strength',
-    description: 'Session type (e.g. strength, cardio, mobility)',
+    example: 'Stretch',
+    description: 'Session type',
+    enum: SessionType,
   })
-  @IsString()
+  @IsEnum(SessionType)
   @IsNotEmpty()
   session_type: SessionType;
 
