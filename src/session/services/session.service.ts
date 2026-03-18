@@ -154,12 +154,13 @@ export class SessionService {
 
       const conflictingSessions = await this.knexService
         .db('sessions')
-        .where('start_time', '<=', createSession.end_time)
-        .where('end_time', '>=', createSession.start_time);
+        .where('trainer_id', createSession.trainer_id)
+        .where('start_time', '<', createSession.end_time)
+        .where('end_time', '>', createSession.start_time);
 
       if (conflictingSessions.length > 0) {
         this.logger.warn(
-          `Session conflict detected for client ID ${createSession.client_id}`,
+          `Session conflict detected for trainer ID ${createSession.trainer_id}`,
         );
         throw new Error('Session time conflict');
       }
@@ -174,12 +175,12 @@ export class SessionService {
         tools_used: createSession.tools_used ?? null,
       };
 
-      const newSession: SessionEntity[] = await this.knexService
+      const [{ id: newSessionId }] = await this.knexService
         .db('sessions')
         .insert(dbSession)
-        .returning('*');
+        .returning('id');
 
-      return this.toSessionResponse(newSession[0]);
+      return this.getSessionById(newSessionId);
     } catch (error) {
       this.logger.error('Error creating new session', error);
       throw new BadRequestException('Failed to create session', error.message);
