@@ -1,6 +1,13 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { SessionType } from '../db/session';
+import { SessionType, ToolMethod } from '../db/session';
 
 export class Session {
   id: string;
@@ -11,6 +18,7 @@ export class Session {
   start_date: Date;
   end_date: Date;
   description: string;
+  tools_used: ToolMethod[] | null;
 }
 
 // --- INPUT DTOs ---
@@ -76,6 +84,17 @@ export class CreateSessionDto {
   @ApiProperty({ example: 'Focus on upper body compound lifts' })
   @IsString()
   description: string;
+
+  @ApiPropertyOptional({
+    example: ['Cupping', 'Hyper volt'],
+    description: 'Tools/methods used during the session',
+    enum: ToolMethod,
+    isArray: true,
+  })
+  @IsArray()
+  @IsEnum(ToolMethod, { each: true })
+  @IsOptional()
+  tools_used?: ToolMethod[];
 }
 
 export class UpdateSessionDto {
@@ -98,4 +117,15 @@ export class UpdateSessionDto {
   @IsString()
   @IsOptional()
   description?: string;
+
+  @ApiPropertyOptional({
+    example: ['PNF stretching', 'Tens unit'],
+    description: 'Tools/methods used during the session',
+    enum: ToolMethod,
+    isArray: true,
+  })
+  @IsArray()
+  @IsEnum(ToolMethod, { each: true })
+  @IsOptional()
+  tools_used?: ToolMethod[];
 }
