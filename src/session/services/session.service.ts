@@ -142,7 +142,7 @@ export class SessionService {
       );
       const existingClient = await this.knexService
         .db('clients')
-        .where('client_id', createSession.client_id)
+        .where('id', createSession.client_id)
         .first();
 
       if (!existingClient) {
