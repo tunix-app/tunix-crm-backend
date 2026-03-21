@@ -84,7 +84,7 @@ export class SessionService {
           'S.description',
           'S.tools_used',
         )
-        .where('C.id', clientId)
+        .where('S.client_id', clientId)
         .orderBy('S.start_time', 'desc');
 
       return sessionEntities.map((s) => this.toSessionResponse(s));
