@@ -11,6 +11,7 @@ import { ClientModule } from './client/client.module';
 import { SessionModule } from './session/session.module';
 import { NoteModule } from './note/note.module';
 import { WaiverModule } from './waiver/waiver.module';
+import { ExerciseModule } from './exercise/exercise.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { WaiverModule } from './waiver/waiver.module';
     SessionModule,
     NoteModule,
     WaiverModule,
+    ExerciseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
