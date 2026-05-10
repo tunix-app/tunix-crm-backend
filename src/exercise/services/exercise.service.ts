@@ -38,7 +38,14 @@ export class ExerciseService {
     const query = this.knexService
       .db('exercises')
       .where('trainer_id', trainerId)
-      .select('id', 'trainer_id', 'name', 'description', 'tags', 'exercise_demo');
+      .select(
+        'id',
+        'trainer_id',
+        'name',
+        'description',
+        'tags',
+        'exercise_demo',
+      );
 
     if (search) {
       query.whereILike('name', `%${search}%`);
@@ -54,7 +61,14 @@ export class ExerciseService {
     const row: ExerciseEntity | undefined = await this.knexService
       .db('exercises')
       .where('id', id)
-      .select('id', 'trainer_id', 'name', 'description', 'tags', 'exercise_demo')
+      .select(
+        'id',
+        'trainer_id',
+        'name',
+        'description',
+        'tags',
+        'exercise_demo',
+      )
       .first();
 
     if (!row) {
@@ -68,7 +82,9 @@ export class ExerciseService {
     trainerId: string,
     dto: CreateExerciseDto,
   ): Promise<Exercise> {
-    this.logger.debug(`Creating exercise "${dto.name}" for trainer ${trainerId}`);
+    this.logger.debug(
+      `Creating exercise "${dto.name}" for trainer ${trainerId}`,
+    );
 
     const duplicate = await this.knexService
       .db('exercises')
@@ -91,7 +107,14 @@ export class ExerciseService {
         tags: JSON.stringify(dto.tags ?? []),
         exercise_demo: dto.exercise_demo ?? null,
       })
-      .returning(['id', 'trainer_id', 'name', 'description', 'tags', 'exercise_demo']);
+      .returning([
+        'id',
+        'trainer_id',
+        'name',
+        'description',
+        'tags',
+        'exercise_demo',
+      ]);
 
     return this.toResponse(row);
   }
@@ -125,15 +148,25 @@ export class ExerciseService {
 
     const updatePayload: Partial<ExerciseEntity> & { tags?: string } = {};
     if (dto.name !== undefined) updatePayload.name = dto.name;
-    if (dto.description !== undefined) updatePayload.description = dto.description;
-    if (dto.tags !== undefined) updatePayload.tags = JSON.stringify(dto.tags) as any;
-    if (dto.exercise_demo !== undefined) updatePayload.exercise_demo = dto.exercise_demo;
+    if (dto.description !== undefined)
+      updatePayload.description = dto.description;
+    if (dto.tags !== undefined)
+      updatePayload.tags = JSON.stringify(dto.tags) as any;
+    if (dto.exercise_demo !== undefined)
+      updatePayload.exercise_demo = dto.exercise_demo;
 
     const [updated]: ExerciseEntity[] = await this.knexService
       .db('exercises')
       .where('id', id)
       .update({ ...updatePayload, updated_at: new Date() })
-      .returning(['id', 'trainer_id', 'name', 'description', 'tags', 'exercise_demo']);
+      .returning([
+        'id',
+        'trainer_id',
+        'name',
+        'description',
+        'tags',
+        'exercise_demo',
+      ]);
 
     return this.toResponse(updated);
   }

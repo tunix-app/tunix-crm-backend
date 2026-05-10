@@ -20,6 +20,13 @@ export class UserController {
     return this.userService.getSuperusers();
   }
 
+  @ApiOperation({ summary: 'Generate an auth token for the selected user' })
+  @ApiParam({ name: 'id', description: 'User UUID' })
+  @Get(':id/token')
+  async getUserToken(@Param('id') id: string) {
+    return this.userService.generateToken(id);
+  }
+
   @ApiOperation({ summary: 'Get a user by ID' })
   @ApiParam({ name: 'id', description: 'User UUID' })
   @Get(':id')

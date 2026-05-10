@@ -4,6 +4,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { KnexService } from '../../infra/database/knex.service';
 import { CreateUserDto } from '../dto/user.dto';
 import { User, UserRole } from '../../types/db/user';
@@ -21,7 +22,14 @@ const ALLOWED_COLUMNS = [
 export class UserService {
   private readonly logger = new Logger(UserService.name);
 
-  constructor(private readonly knexService: KnexService) {}
+  constructor(
+    private readonly knexService: KnexService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  generateToken(userId: string): { token: string } {
+    return { token: this.jwtService.sign({ id: userId }) };
+  }
 
   async createUser(createUser: CreateUserDto): Promise<User> {
     const newUser: User[] = await this.knexService
