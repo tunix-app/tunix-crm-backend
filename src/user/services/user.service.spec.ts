@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { UserService } from './user.service';
 import { KnexService } from '../../infra/database/knex.service';
 import { CreateUserDto, UserRole } from '../dto/user.dto';
@@ -35,6 +36,12 @@ describe('UserService', () => {
           provide: KnexService,
           useValue: {
             db: mockDb,
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn().mockReturnValue('mock-token'),
           },
         },
       ],
