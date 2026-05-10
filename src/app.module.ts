@@ -8,6 +8,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { ClientModule } from './client/client.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 import { SessionModule } from './session/session.module';
 import { NoteModule } from './note/note.module';
 import { WaiverModule } from './waiver/waiver.module';
@@ -22,6 +23,7 @@ import { ExerciseModule } from './exercise/exercise.module';
     AuthModule,
     UserModule,
     ClientModule,
+    DashboardModule,
     SessionModule,
     NoteModule,
     WaiverModule,

@@ -26,7 +26,11 @@ export class ExerciseController {
 
   @ApiOperation({ summary: "Get all exercises in a trainer's catalog" })
   @ApiParam({ name: 'trainerId', description: 'Trainer UUID' })
-  @ApiQuery({ name: 'search', required: false, description: 'Filter by name (case-insensitive)' })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Filter by name (case-insensitive)',
+  })
   @Get('trainer/:trainerId')
   async getExercisesByTrainer(
     @Param('trainerId') trainerId: string,
