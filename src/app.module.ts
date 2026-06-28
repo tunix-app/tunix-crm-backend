@@ -13,6 +13,7 @@ import { SessionModule } from './session/session.module';
 import { NoteModule } from './note/note.module';
 import { WaiverModule } from './waiver/waiver.module';
 import { ExerciseModule } from './exercise/exercise.module';
+import { ProgramModule } from './program/program.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { ExerciseModule } from './exercise/exercise.module';
     NoteModule,
     WaiverModule,
     ExerciseModule,
+    ProgramModule,
   ],
   controllers: [AppController],
   providers: [AppService],
