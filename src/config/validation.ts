@@ -9,7 +9,10 @@ export const validate = (cfg: Record<string, unknown>) => {
     DATABASE_URL: Joi.string().required(),
     DIRECT_URL: Joi.string().optional(),
     SUPABASE_URL: Joi.string().uri().required(),
+    SUPABASE_ANON_KEY: Joi.string().required(),
     SUPABASE_SERVICE_ROLE_KEY: Joi.string().required(),
+    RESEND_API_KEY: Joi.string().required(),
+    RESEND_FROM_EMAIL: Joi.string().email().required(),
   }).unknown(true);
 
   const { error, value } = schema.validate(cfg);
