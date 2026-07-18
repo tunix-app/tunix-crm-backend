@@ -37,10 +37,7 @@ export class NoteService {
     }
   }
 
-  async createNote(
-    clientId: string,
-    newNote: any,
-  ): Promise<{ message: string }> {
+  async createNote(clientId: string, newNote: any): Promise<Note> {
     this.logger.debug(`Creating note for client ${clientId}`);
     try {
       const existingClient = await this.knexService
@@ -59,22 +56,31 @@ export class NoteService {
         created_at: new Date(),
       };
 
-      await this.knexService.db('notes').insert(newNoteEntity).returning('*');
+      const [inserted]: NoteEntity[] = await this.knexService
+        .db('notes')
+        .insert(newNoteEntity)
+        .returning('*');
 
-      return { message: `Note created for client ${clientId}` };
+      return {
+        id: inserted.id,
+        client_id: inserted.client_id,
+        tags: inserted.tags,
+        content: inserted.content,
+        date: inserted.created_at,
+      };
     } catch (error) {
       this.logger.error(
         `Failed to create note for client ${clientId}`,
         error.stack,
       );
-      throw new BadRequestException('Failed to create note', error.message);
+      throw error;
     }
   }
 
-  async updateNote(id: string, updateNote: any): Promise<{ message: string }> {
+  async updateNote(id: string, updateNote: any): Promise<Note> {
     this.logger.debug(`Updating note ${id}`);
     try {
-      await this.knexService
+      const [updated]: NoteEntity[] = await this.knexService
         .db('notes')
         .where('id', id)
         .update({
@@ -83,10 +89,16 @@ export class NoteService {
         })
         .returning('*');
 
-      return { message: `Note ${id} updated successfully` };
+      return {
+        id: updated.id,
+        client_id: updated.client_id,
+        tags: updated.tags,
+        content: updated.content,
+        date: updated.updated_at ?? updated.created_at,
+      };
     } catch (error) {
       this.logger.error(`Failed to update note ${id}`, error.stack);
-      throw new Error('Failed to update note', error.message);
+      throw error;
     }
   }
 

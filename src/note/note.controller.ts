@@ -29,7 +29,7 @@ export class NoteController {
   async createNote(
     @Param() params: any,
     @Body() createNoteDto: CreateNoteDto,
-  ): Promise<{ message: string }> {
+  ): Promise<Note> {
     return await this.noteService.createNote(params.clientId, createNoteDto);
   }
 
@@ -39,7 +39,7 @@ export class NoteController {
   async updateNote(
     @Param() params: any,
     @Body() updateNoteDto: UpdateNoteDto,
-  ): Promise<{ message: string }> {
+  ): Promise<Note> {
     return await this.noteService.updateNote(params.id, updateNoteDto);
   }
 
